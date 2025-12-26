@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlmodel
+langgraph
+langchain
+langchain_community
+langchain_openai
+chromadb
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+python-dotenv
+httpx
+pytest
