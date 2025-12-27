@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
 import ChatInterface from './ChatInterface';
 import BookAdvisor from './BookAdvisor';
 import TutoringCenter from './TutoringCenter';
@@ -12,7 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const Sidebar = ({ activeTab, onTabChange }) => {
+const Sidebar = ({ activeTab, onTabChange, userData }) => {
     const navigate = useNavigate();
     const handleLogout = () => { localStorage.removeItem('token'); navigate('/login'); };
 
@@ -61,9 +62,13 @@ const Sidebar = ({ activeTab, onTabChange }) => {
 
                 {/* User Profile Micro */}
                 <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', borderRadius: '12px' }}>
-                    <div style={{ width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>TU</div>
-                    <div>
-                        <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>TEST User</div>
+                    <div style={{ width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                        {userData?.full_name ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : '??'}
+                    </div>
+                    <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontWeight: '600', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {userData?.full_name || 'Loading...'}
+                        </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Computer Science</div>
                     </div>
                 </div>
@@ -72,7 +77,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
     );
 };
 
-const DashboardHome = ({ onNavigate }) => {
+const DashboardHome = ({ onNavigate, userData }) => {
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
             {/* Hero Section */}
@@ -85,7 +90,9 @@ const DashboardHome = ({ onNavigate }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem', opacity: 0.9 }}>
                         <GraduationCap size={18} /> Your Academic Success Navigator
                     </div>
-                    <h1 style={{ fontSize: '2.5rem', margin: '0.5rem 0 1rem 0', fontWeight: '700' }}>Good afternoon, TEST User!</h1>
+                    <h1 style={{ fontSize: '2.5rem', margin: '0.5rem 0 1rem 0', fontWeight: '700' }}>
+                        Good afternoon, {userData?.full_name ? userData.full_name.split(' ')[0] : 'Student'}!
+                    </h1>
                     <p style={{ maxWidth: '500px', fontSize: '1.1rem', opacity: 0.9, marginBottom: '2rem', lineHeight: '1.6' }}>
                         You have 3 assignments due this week and a chemistry midterm on Tuesday. I'm here to help you stay on track!
                     </p>
@@ -172,13 +179,26 @@ const DashboardHome = ({ onNavigate }) => {
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await api.get('/api/users/me');
+                setUserData(response.data);
+            } catch (error) {
+                console.error("Failed to fetch user data:", error);
+            }
+        };
+        fetchUser();
+    }, []);
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: '#f8fafc' }}>
-            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} userData={userData} />
 
             <main style={{ flex: 1, padding: '2rem 3rem', overflowY: 'auto' }}>
-                {activeTab === 'dashboard' && <DashboardHome onNavigate={setActiveTab} />}
+                {activeTab === 'dashboard' && <DashboardHome onNavigate={setActiveTab} userData={userData} />}
 
                 {activeTab === 'chat' && (
                     <div style={{ height: '100%' }}>
