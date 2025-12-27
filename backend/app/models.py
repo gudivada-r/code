@@ -7,6 +7,8 @@ class User(SQLModel, table=True):
     email: str = Field(unique=True, index=True)
     password_hash: str
     full_name: Optional[str] = None
+    gpa: float = Field(default=0.0)
+    on_track_score: int = Field(default=0)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     

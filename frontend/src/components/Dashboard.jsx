@@ -104,11 +104,11 @@ const DashboardHome = ({ onNavigate, userData }) => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div className="stat-card-glass">
-                        <div style={{ fontSize: '2rem', fontWeight: '700' }}>3.7</div>
+                        <div style={{ fontSize: '2rem', fontWeight: '700' }}>{userData?.gpa?.toFixed(1) || '0.0'}</div>
                         <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Current GPA</div>
                     </div>
                     <div className="stat-card-glass">
-                        <div style={{ fontSize: '2rem', fontWeight: '700' }}>87%</div>
+                        <div style={{ fontSize: '2rem', fontWeight: '700' }}>{userData?.on_track_score || '0'}%</div>
                         <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>On-track score</div>
                     </div>
                 </div>
