@@ -25,19 +25,25 @@ def on_startup():
     from app.models import Tutor
     SQLModel.metadata.create_all(engine)
     
-    # Seed Tutors if empty
+    # Seed Tutors if missing
     with Session(engine) as session:
-        statement = select(Tutor)
-        existing_tutors = session.exec(statement).first()
-        if not existing_tutors:
-            tutors = [
-                Tutor(name="Alex Rivera", subjects="Calculus, Physics", rating=4.9, reviews=124, image="AR", color="#4f46e5"),
-                Tutor(name="Sarah Chen", subjects="Chemistry, Biology", rating=4.8, reviews=89, image="SC", color="#10b981"),
-                Tutor(name="Marcus Bell", subjects="History, English", rating=5.0, reviews=215, image="MB", color="#f59e0b"),
-                Tutor(name="Elena Frost", subjects="Computer Science, Data Structures", rating=4.7, reviews=56, image="EF", color="#ec4899"),
-            ]
-            session.add_all(tutors)
-            session.commit()
+        sample_tutors = [
+            Tutor(name="Alex Rivera", subjects="Calculus, Physics", rating=4.9, reviews=124, image="AR", color="#4f46e5"),
+            Tutor(name="Sarah Chen", subjects="Chemistry, Biology", rating=4.8, reviews=89, image="SC", color="#10b981"),
+            Tutor(name="Marcus Bell", subjects="History, English", rating=5.0, reviews=215, image="MB", color="#f59e0b"),
+            Tutor(name="Elena Frost", subjects="Computer Science, Data Structures", rating=4.7, reviews=56, image="EF", color="#ec4899"),
+            Tutor(name="David Park", subjects="Economics, Statistics", rating=4.9, reviews=92, image="DP", color="#8b5cf6"),
+            Tutor(name="Maya Gupta", subjects="Psychology, Sociology", rating=4.8, reviews=156, image="MG", color="#f43f5e"),
+            Tutor(name="Jordan Smith", subjects="Art History, Design", rating=4.6, reviews=43, image="JS", color="#06b6d4"),
+            Tutor(name="Sam Wilson", subjects="Political Science, Law", rating=5.0, reviews=188, image="SW", color="#f97316"),
+        ]
+        
+        for t in sample_tutors:
+            statement = select(Tutor).where(Tutor.name == t.name)
+            existing = session.exec(statement).first()
+            if not existing:
+                session.add(t)
+        session.commit()
 
 @app.get("/")
 async def root():
