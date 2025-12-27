@@ -43,16 +43,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 import os
 from sqlmodel import create_engine
 
-# Database configuration
+# Database configuration – use Neon (or any PostgreSQL) via DATABASE_URL
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    sqlite_file_name = "database.db"
-    # If on Vercel, use /tmp which is writable
-    if os.getenv("VERCEL"):
-        sqlite_file_name = "/tmp/database.db"
-    DATABASE_URL = f"sqlite:///{sqlite_file_name}"
-
-engine = create_engine(DATABASE_URL)
+    raise RuntimeError("DATABASE_URL environment variable not set. Provide a Neon PostgreSQL connection string.")
+# Neon requires SSL
+engine = create_engine(DATABASE_URL, echo=False, connect_args={"sslmode": "require"})
 
 def get_session():
     with Session(engine) as session:

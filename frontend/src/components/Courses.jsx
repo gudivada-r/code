@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { BookOpen, Plus, Trash2, TrendingUp, Award } from 'lucide-react';
 import { motion } from 'framer-motion';

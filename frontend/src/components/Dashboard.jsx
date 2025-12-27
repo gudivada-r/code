@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ChatInterface from './ChatInterface';
 import BookAdvisor from './BookAdvisor';
+import TutoringCenter from './TutoringCenter';
 import Courses from './Courses';
+import WellnessCheck from './WellnessCheck';
 import {
     LayoutDashboard, MessageSquare, Calendar, BookOpen,
     TrendingUp, User, Settings, LogOut, Search, Clock,
@@ -42,8 +44,12 @@ const Sidebar = ({ activeTab, onTabChange }) => {
                     <BookOpen size={20} /> Courses
                 </div>
                 <div className="nav-item"><TrendingUp size={20} /> Progress</div>
-                <div className="nav-item"><Users size={20} /> Tutoring</div>
-                <div className="nav-item"><Heart size={20} /> Wellness</div>
+                <div className={`nav-item ${activeTab === 'tutoring' ? 'active' : ''}`} onClick={() => onTabChange('tutoring')}>
+                    <Users size={20} /> Tutoring
+                </div>
+                <div className={`nav-item ${activeTab === 'wellness' ? 'active' : ''}`} onClick={() => onTabChange('wellness')}>
+                    <Heart size={20} /> Wellness
+                </div>
             </div>
 
             {/* Bottom Config */}
@@ -106,9 +112,9 @@ const DashboardHome = ({ onNavigate }) => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                 {[
                     { icon: Calendar, color: '#6366f1', label: 'Book Advisor', sub: 'Schedule a meeting', action: 'schedule' },
-                    { icon: BookOpen, color: '#10b981', label: 'Tutoring Center', sub: 'Get study help' },
+                    { icon: BookOpen, color: '#10b981', label: 'Tutoring Center', sub: 'Get study help', action: 'tutoring' },
                     { icon: FileText, color: '#f59e0b', label: 'Drop/Add Forms', sub: 'Deadline: Oct 15' },
-                    { icon: Heart, color: '#ec4899', label: 'Wellness Check', sub: 'How are you feeling?' },
+                    { icon: Heart, color: '#ec4899', label: 'Wellness Check', sub: 'How are you feeling?', action: 'wellness' },
                     { icon: Clock, color: '#eab308', label: 'Study Timer', sub: 'Stay focused' },
                 ].map((item, idx) => (
                     <motion.div
@@ -141,7 +147,7 @@ const DashboardHome = ({ onNavigate }) => {
                     { title: "The Admin", role: "Forms & deadlines expert", color: "#10b981", icon: FileText, tags: ["Drop deadline?", "Add a course", "Transcript request"] },
                     { title: "The Coach", role: "Wellness & support guide", color: "#ec4899", icon: Heart, tags: ["Feeling stressed", "Find a club", "Mental health resouces"] },
                 ].map((agent, idx) => (
-                    <motion.div key={idx} className="card-white">
+                    <motion.div key={idx} className="card-white" style={{ cursor: 'pointer' }} onClick={() => onNavigate('chat')}>
                         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                             <div style={{ background: agent.color, padding: '12px', borderRadius: '12px', color: 'white' }}>
                                 <agent.icon size={24} />
@@ -186,6 +192,10 @@ const Dashboard = () => {
                 {activeTab === 'schedule' && <BookAdvisor onBack={() => setActiveTab('dashboard')} />}
 
                 {activeTab === 'courses' && <Courses />}
+
+                {activeTab === 'tutoring' && <TutoringCenter />}
+
+                {activeTab === 'wellness' && <WellnessCheck />}
             </main>
         </div>
     );
