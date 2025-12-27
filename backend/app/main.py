@@ -29,16 +29,18 @@ def on_startup():
     # Simple migration: Add missing columns to 'user' table if they don't exist
     with engine.connect() as conn:
         columns_to_add = [
+            ("full_name", "VARCHAR"),
             ("gpa", "FLOAT DEFAULT 0.0"),
             ("on_track_score", "INTEGER DEFAULT 0")
         ]
         for col_name, col_type in columns_to_add:
             try:
-                # PostgreSQL specific: check if column exists first to avoid error spam
-                conn.execute(text(f"ALTER TABLE \"user\" ADD COLUMN {col_name} {col_type}"))
+                # Use double quotes for Postgres reserved names like "user"
+                conn.execute(text(f'ALTER TABLE "user" ADD COLUMN {col_name} {col_type}'))
                 conn.commit()
+                print(f"Successfully added column {col_name} to user table")
             except Exception as e:
-                # Column likely already exists, ignore
+                # Column exists or other non-critical error
                 continue
     
     # Seed Tutors if missing
