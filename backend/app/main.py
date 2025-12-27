@@ -21,9 +21,25 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     from sqlmodel import SQLModel, Session, select
+    from sqlalchemy import text
     from app.auth import engine
     from app.models import Tutor
     SQLModel.metadata.create_all(engine)
+    
+    # Simple migration: Add missing columns to 'user' table if they don't exist
+    with engine.connect() as conn:
+        columns_to_add = [
+            ("gpa", "FLOAT DEFAULT 0.0"),
+            ("on_track_score", "INTEGER DEFAULT 0")
+        ]
+        for col_name, col_type in columns_to_add:
+            try:
+                # PostgreSQL specific: check if column exists first to avoid error spam
+                conn.execute(text(f"ALTER TABLE \"user\" ADD COLUMN {col_name} {col_type}"))
+                conn.commit()
+            except Exception as e:
+                # Column likely already exists, ignore
+                continue
     
     # Seed Tutors if missing
     with Session(engine) as session:
