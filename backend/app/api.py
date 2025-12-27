@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
 
-from app.auth import get_session, User, create_access_token, get_password_hash, verify_password, get_current_user
-from app.models import ChatSession, ChatMessage, Tutor
+from app.auth import get_session, create_access_token, get_password_hash, verify_password, get_current_user
+from app.models import ChatSession, ChatMessage, Tutor, User
 from app.agent.graph import app_graph
 from langchain_core.messages import HumanMessage
 
