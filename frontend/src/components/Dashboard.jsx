@@ -6,6 +6,7 @@ import BookAdvisor from './BookAdvisor';
 import TutoringCenter from './TutoringCenter';
 import Courses from './Courses';
 import WellnessCheck from './WellnessCheck';
+import StudyTimer from './StudyTimer';
 import {
     LayoutDashboard, MessageSquare, Calendar, BookOpen,
     TrendingUp, User, Settings, LogOut, Search, Clock,
@@ -53,6 +54,9 @@ const Sidebar = ({ activeTab, onTabChange, userData }) => {
                 </div>
                 <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => handleProtectedTab('courses')}>
                     <BookOpen size={20} /> Courses
+                </div>
+                <div className={`nav-item ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => handleProtectedTab('timer')}>
+                    <Clock size={20} /> Study Timer
                 </div>
                 <div className="nav-item" onClick={() => handleProtectedTab('progress')}><TrendingUp size={20} /> Progress</div>
                 <div className={`nav-item ${activeTab === 'tutoring' ? 'active' : ''}`} onClick={() => handleProtectedTab('tutoring')}>
@@ -146,7 +150,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                     { icon: BookOpen, color: '#10b981', label: 'Tutoring Center', sub: 'Get study help', action: 'tutoring' },
                     { icon: FileText, color: '#f59e0b', label: 'Drop/Add Forms', sub: 'Deadline: Oct 15' },
                     { icon: Heart, color: '#ec4899', label: 'Wellness Check', sub: 'How are you feeling?', action: 'wellness' },
-                    { icon: Clock, color: '#eab308', label: 'Study Timer', sub: 'Stay focused' },
+                    { icon: Clock, color: '#eab308', label: 'Study Timer', sub: 'Stay focused', action: 'timer' },
                 ].map((item, idx) => (
                     <motion.div
                         whileHover={{ scale: 1.02 }}
@@ -306,6 +310,8 @@ const Dashboard = () => {
                 {activeTab === 'tutoring' && <TutoringCenter />}
 
                 {activeTab === 'wellness' && <WellnessCheck />}
+
+                {activeTab === 'timer' && <StudyTimer onBack={() => setActiveTab('dashboard')} />}
             </main>
 
             {/* Modal can be triggered from anywhere */}
