@@ -104,9 +104,9 @@ const Sidebar = ({ activeTab, onTabChange, userData }) => {
                 <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9', fontSize: '0.65rem', color: '#94a3b8' }}>
                     <div style={{ marginBottom: '0.25rem' }}>© 2025 Student Success</div>
                     <div style={{ display: 'flex', gap: '12px' }}>
-                        <span style={{ cursor: 'pointer', hover: { textDecoration: 'underline' } }}>Privacy</span>
-                        <span style={{ cursor: 'pointer', hover: { textDecoration: 'underline' } }}>MSA</span>
-                        <span style={{ cursor: 'pointer', hover: { textDecoration: 'underline' } }}>SLA</span>
+                        <span onClick={() => handleProtectedTab('privacy')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>Privacy</span>
+                        <span onClick={() => handleProtectedTab('msa')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>MSA</span>
+                        <span onClick={() => handleProtectedTab('sla')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>SLA</span>
                     </div>
                 </div>
             </div>
@@ -293,19 +293,24 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
     );
 };
 
+import PrivacyPolicy from './legal/PrivacyPolicy';
+import MSA from './legal/MSA';
+import SLA from './legal/SLA';
+
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [chatMode, setChatMode] = useState(null); // 'tutor', 'admin', 'coach', or null
     const [userData, setUserData] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const navigate = useNavigate();
 
     const fetchUser = async () => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
         try {
-            const response = await api.get('/api/users/me');
-            setUserData(response.data);
+            const res = await api.get('/api/users/me');
+            setUserData(res.data);
         } catch (error) {
             console.error("Failed to fetch user data:", error);
             if (error.response?.status === 401) {
@@ -362,6 +367,12 @@ const Dashboard = () => {
                 {activeTab === 'forms' && <DropAddForms onBack={() => setActiveTab('dashboard')} />}
 
                 {activeTab === 'progress' && <Progress />}
+
+                {/* Legal Pages */}
+                {activeTab === 'privacy' && <PrivacyPolicy onBack={() => setActiveTab('dashboard')} />}
+                {activeTab === 'msa' && <MSA onBack={() => setActiveTab('dashboard')} />}
+                {activeTab === 'sla' && <SLA onBack={() => setActiveTab('dashboard')} />}
+
             </main>
 
             {/* Modal can be triggered from anywhere */}
