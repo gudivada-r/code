@@ -60,3 +60,24 @@ Or manually open `frontend/ios/App/App.xcworkspace`.
 
 *   **CocoaPods Errors**: If you encounter issues with dependencies, try running `cd ios/App && pod install` on your Mac.
 *   **Assets Not Updating**: Make sure you ran `npm run mobile:sync` *before* opening Xcode.
+
+## For Windows Users
+
+Directly building iOS apps (`.ipa` files) or uploading to the App Store is **not possible on Windows** because Xcode is required. However, you can use **GitHub Actions** (Cloud Build) to perform the build for you.
+
+### How to use the Cloud Build
+We have included a GitHub Action workflow (`.github/workflows/ios-build.yml`) that runs on a virtual Mac.
+
+1.  **Commit and Push** your changes to GitHub.
+2.  Go to the **Actions** tab in your GitHub repository.
+3.  Select the **Build iOS App** workflow.
+4.  This will verify your code builds correctly on iOS.
+
+### To release to App Store from Windows:
+You must configure **Code Signing** in the GitHub Action. This requires:
+1.  An Apple Developer Account.
+2.  Exporting your `Distribution Certificate (.p12)` and `Provisioning Profile` (this typically requires access to a Mac at least once, or correct use of OpenSSL).
+3.  Adding these as **Secrets** in your GitHub Repository settings.
+4.  Updating the workflow to use `fastlane` or `xcodebuild` with signing enabled.
+
+**Alternative**: Use a service like **Bitrise**, **Codemagic**, or **Ionic Appflow**, which specialize in building iOS apps from the cloud for Windows developers.
