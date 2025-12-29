@@ -76,3 +76,33 @@ class Advisor(SQLModel, table=True):
     availability: str
     email: str
     image: Optional[str] = None
+
+class StudyGroup(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    course_code: str
+    topic: str
+    schedule: str  # e.g., "Mondays 5PM"
+    location: str  # e.g., "Library Room 304"
+    members_count: int = Field(default=1)
+    max_members: int = Field(default=5)
+    created_by: int = Field(foreign_key="user.id")
+
+class Mentorship(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    mentor_id: int = Field(foreign_key="user.id")
+    mentor_name: str
+    specialty: str # e.g. "Computer Science", "Career Advice"
+    bio: str
+    availability: str
+    
+class MarketplaceItem(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    seller_id: int = Field(foreign_key="user.id")
+    seller_name: str
+    title: str
+    price: float
+    condition: str # "New", "Good", "Fair"
+    image_url: Optional[str] = None
+    status: str = Field(default="available") # available, sold
+    created_at: datetime = Field(default_factory=datetime.utcnow)

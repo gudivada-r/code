@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
-import { Send, BookOpen, CheckSquare, AlertCircle } from 'lucide-react';
+import { Send, BookOpen, CheckSquare, Paperclip, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const ChatInterface = ({ mode }) => {
+const ChatInterface = ({ mode, initialSessionId = null }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [activeSessionId, setActiveSessionId] = useState(initialSessionId);
+    const [attachment, setAttachment] = useState(null);
     const messagesEndRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -15,36 +18,95 @@ const ChatInterface = ({ mode }) => {
 
     useEffect(scrollToBottom, [messages]);
 
-    // Clear messages when switching modes (optional, but good for context switching)
     useEffect(() => {
-        setMessages([]);
-    }, [mode]);
+        if (initialSessionId) {
+            setActiveSessionId(initialSessionId);
+            loadHistory(initialSessionId);
+        } else {
+            setActiveSessionId(null);
+            setMessages([]);
+        }
+    }, [initialSessionId, mode]);
+
+    const loadHistory = async (id) => {
+        setLoading(true);
+        try {
+            const res = await api.get(`/api/chat/history/${id}`);
+            const formatted = res.data.map(msg => {
+                let content = msg.content;
+                if (msg.sender === 'ai' && typeof content === 'string') {
+                    try { content = JSON.parse(content); } catch (e) { }
+                }
+                if (msg.sender === 'ai' && typeof content === 'object') {
+                    return { sender: 'ai', ...content };
+                }
+                return { sender: msg.sender, content: content };
+            });
+            setMessages(formatted);
+        } catch (error) {
+            console.error("Failed to load history", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFileSelect = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setAttachment(e.target.files[0]);
+        }
+    };
 
     const sendMessage = async (e) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() && !attachment) return;
 
-        const userMsg = { sender: 'user', content: input };
+        // Optimistic Update
+        let displayContent = input;
+        if (attachment) displayContent += `\n[Attached: ${attachment.name}]`;
+
+        const userMsg = { sender: 'user', content: displayContent };
         setMessages(prev => [...prev, userMsg]);
         setInput('');
+
+        const currentAttachment = attachment;
+        setAttachment(null); // Clear early
         setLoading(true);
 
         try {
-            const response = await api.post(
-                '/api/chat/query',
-                null,
-                { params: { query: userMsg.content } }
-            );
+            // Upload File first if exists
+            let fileId = null;
+            if (currentAttachment) {
+                const formData = new FormData();
+                formData.append('file', currentAttachment);
+                const uploadRes = await api.post('/api/chat/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                fileId = uploadRes.data.filename;
+            }
+
+            // Send Query
+            const payload = {
+                query: input || "Analyze the attached document.", // Fallback if only file sent
+                session_id: activeSessionId,
+                file_id: fileId
+            };
+
+            const response = await api.post('/api/chat/query', payload);
+
+            if (response.data.session_id) {
+                setActiveSessionId(response.data.session_id);
+            }
 
             setMessages(prev => [...prev, { sender: 'ai', ...response.data }]);
         } catch (error) {
-            setMessages(prev => [...prev, { sender: 'ai', message_content: "Error connecting to Student Success." }]);
+            setMessages(prev => [...prev, { sender: 'ai', message_content: "Error processing your request." }]);
         } finally {
             setLoading(false);
         }
     };
 
     const getIntro = () => {
+        if (activeSessionId) return null;
         if (mode === 'tutor') return { title: "Hello! I am The Tutor.", sub: "I can help you understand course material, review essays, and solve problems." };
         if (mode === 'admin') return { title: "Hello! I am The Admin.", sub: "Ask me about forms, deadlines, financial aid, and registration." };
         if (mode === 'coach') return { title: "Hello! I am The Coach.", sub: "I'm here to support your mental health and well-being." };
@@ -55,7 +117,7 @@ const ChatInterface = ({ mode }) => {
     return (
         <div className="chat-container" style={{ display: 'flex', flexDirection: 'column', height: '100%', borderRadius: 0, boxShadow: 'none' }}>
             <div style={{ flex: 1, padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {messages.length === 0 && (
+                {messages.length === 0 && intro && (
                     <div style={{ textAlign: 'center', marginTop: 'auto', marginBottom: 'auto', opacity: 0.5 }}>
                         <h3>{intro.title}</h3>
                         <p>{intro.sub}</p>
@@ -76,9 +138,9 @@ const ChatInterface = ({ mode }) => {
                             borderTopRightRadius: msg.sender === 'user' ? '0' : '12px',
                             borderTopLeftRadius: msg.sender === 'ai' ? '0' : '12px'
                         }}>
-                            {msg.sender === 'user' ? msg.content : (
+                            {msg.sender === 'user' ? <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div> : (
                                 <div>
-                                    <p>{msg.message_content}</p>
+                                    <p>{msg.message_content || msg.content}</p>
 
                                     {msg.cited_sources && msg.cited_sources.length > 0 && (
                                         <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
@@ -110,7 +172,28 @@ const ChatInterface = ({ mode }) => {
             </div>
 
             <div style={{ padding: '1.5rem', borderTop: '1px solid #f1f5f9', background: 'white' }}>
+                {attachment && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem', fontSize: '0.85rem', background: '#e0e7ff', padding: '4px 8px', borderRadius: '4px', width: 'fit-content' }}>
+                        <Paperclip size={14} /> {attachment.name}
+                        <X size={14} style={{ cursor: 'pointer' }} onClick={() => setAttachment(null)} />
+                    </div>
+                )}
                 <form onSubmit={sendMessage} style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                        title="Attach Document"
+                    >
+                        <Paperclip size={20} />
+                    </button>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileSelect}
+                    />
+
                     <input
                         style={{
                             flex: 1,

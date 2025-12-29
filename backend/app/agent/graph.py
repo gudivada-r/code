@@ -38,14 +38,21 @@ async def tutor_agent(state: AgentState):
     """
     Academic Tutor Agent.
     """
-    query = state["messages"][-1].content
+    messages = state["messages"]
+    last_msg = messages[-1].content
+    
     # Reason: Check LMS for context
     grades = await lms_tool.get_student_grades(state["student_id"])
     
     # Act: Use RAG for academic policies/resources or knowledge
-    rag_info = rag_tool.query(query, category="academic")
+    rag_info = rag_tool.query(last_msg, category="academic")
     
-    message = f"I see your grades are: {grades}. Based on '{query}', here is some info: {rag_info}. Let's make a study plan."
+    # Basic Memory check: see if previous messages exist
+    context_prefix = ""
+    if len(messages) > 1:
+        context_prefix = f"Considering our previous discussion about {messages[-3].content if len(messages)>2 else 'your studies'}, "
+    
+    message = f"{context_prefix}I see your grades are: {grades}. Based on '{last_msg}', here is some info: {rag_info}. Let's make a study plan."
     
     return {
         "messages": [AIMessage(content=message)],

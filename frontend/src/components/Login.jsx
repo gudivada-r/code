@@ -3,6 +3,8 @@ import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import './Login.css';
+
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -34,25 +36,9 @@ const Login = () => {
     };
 
     return (
-        <div className="login-wrapper" style={{
-            display: 'flex',
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #0f172a, #1e293b)',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '2rem'
-        }}>
+        <div className="login-wrapper">
             {/* Left side – hero illustration and tagline */}
-            <div className="login-hero" style={{
-                flex: 1,
-                maxWidth: '560px',
-                marginRight: '2rem',
-                color: 'white',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                gap: '1.5rem'
-            }}>
+            <div className="login-hero">
                 <h1 style={{
                     fontSize: '3rem',
                     fontWeight: '800',
@@ -88,18 +74,6 @@ const Login = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="glass-panel"
-                style={{
-                    padding: '3rem',
-                    width: '100%',
-                    maxWidth: '480px',
-                    background: 'rgba(255,255,255,0.08)',
-                    backdropFilter: 'blur(12px)',
-                    borderRadius: '16px',
-                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1.5rem'
-                }}
             >
                 <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                     <div style={{
@@ -113,10 +87,7 @@ const Login = () => {
                         margin: '0 auto 1.5rem auto',
                         boxShadow: '0 4px 20px rgba(83, 91, 242, 0.4)'
                     }}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                            <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                        </svg>
+                        <img src="/icon.svg" alt="Logo" style={{ width: '40px', height: '40px' }} />
                     </div>
                     <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: '0', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                         {isRegistering ? 'Create your account' : 'Sign in'}
@@ -135,7 +106,7 @@ const Login = () => {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 required={isRegistering}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'rgba(255,255,255,0.1)', color: '#fff' }}
+                                className="login-input"
                             />
                         </div>
                     )}
@@ -147,7 +118,7 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'rgba(255,255,255,0.1)', color: '#fff' }}
+                            className="login-input"
                         />
                     </div>
                     <div>
@@ -158,10 +129,10 @@ const Login = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'rgba(255,255,255,0.1)', color: '#fff' }}
+                            className="login-input"
                         />
                     </div>
-                    <button type="submit" className="btn-primary" style={{ marginTop: '1rem', padding: '1rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
+                    <button type="submit" className="login-btn">
                         {isRegistering ? 'Get Started' : 'Sign In'}
                     </button>
                 </form>

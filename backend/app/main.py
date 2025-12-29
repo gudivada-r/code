@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+
+load_dotenv(override=True)
+
 from app.api import router
 
 app = FastAPI(title="Student Success API", version="0.1.0")

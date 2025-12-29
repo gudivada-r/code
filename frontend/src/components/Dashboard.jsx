@@ -9,11 +9,16 @@ import WellnessCheck from './WellnessCheck';
 import StudyTimer from './StudyTimer';
 import DropAddForms from './DropAddForms';
 import Progress from './Progress';
+import History from './History';
 import AdminPanel from './AdminPanel';
+import FlashcardGenerator from './FlashcardGenerator';
+import SyllabusScanner from './SyllabusScanner';
+import SocialCampus from './SocialCampus';
+import LectureVoiceNotes from './LectureVoiceNotes';
 import {
     LayoutDashboard, MessageSquare, Calendar, BookOpen,
     TrendingUp, User, Settings, LogOut, Search, Clock,
-    Users, FileText, Heart, GraduationCap, ChevronRight, Edit3, Menu, X, Shield
+    Users, FileText, Heart, GraduationCap, ChevronRight, Edit3, Menu, X, Shield, History as HistoryIcon, Brain, ScanLine, Mic
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -42,12 +47,12 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                 onClick={onClose}
             ></div>
 
-            <div className={`sidebar ${isOpen ? 'open' : ''}`} style={{ width: '260px', flexShrink: 0 }}>
+            <div className={`sidebar ${isOpen ? 'open' : ''}`}>
                 {/* Logo & Close Button */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', paddingLeft: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ background: '#4f46e5', padding: '8px', borderRadius: '10px' }}>
-                            <GraduationCap color="white" size={24} />
+                        <div style={{ padding: '4px', borderRadius: '10px' }}>
+                            <img src="/icon.svg" alt="Logo" style={{ width: '32px', height: '32px' }} />
                         </div>
                         <div>
                             <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>Navigator</h2>
@@ -61,9 +66,9 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                 </div>
 
                 {/* Nav Items */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto' }}>
                     {/* ... existing dynamic nav items ... */}
-                    {['dashboard', 'chat', 'schedule', 'courses', 'timer', 'forms', 'progress', 'tutoring', 'wellness'].map(key => (
+                    {['dashboard', 'chat', 'history', 'schedule', 'courses', 'timer', 'smart-study', 'voice-notes', 'syllabus', 'social', 'forms', 'progress', 'tutoring', 'wellness', 'adminPanel'].map(key => (
                         <div
                             key={key}
                             className={`nav-item ${activeTab === key ? 'active' : ''}`}
@@ -71,13 +76,19 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                         >
                             {key === 'dashboard' && <><LayoutDashboard size={20} /> Dashboard</>}
                             {key === 'chat' && <><MessageSquare size={20} /> AI Navigator</>}
+                            {key === 'history' && <><HistoryIcon size={20} /> My History</>}
                             {key === 'schedule' && <><Calendar size={20} /> Schedule</>}
                             {key === 'courses' && <><BookOpen size={20} /> Courses</>}
                             {key === 'timer' && <><Clock size={20} /> Study Timer</>}
+                            {key === 'smart-study' && <><Brain size={20} /> Smart Study</>}
+                            {key === 'voice-notes' && <><Mic size={20} /> Lecture Notes</>}
+                            {key === 'syllabus' && <><ScanLine size={20} /> Syllabus Scanner</>}
+                            {key === 'social' && <><Users size={20} /> Social Campus</>}
                             {key === 'forms' && <><FileText size={20} /> Drop/Add Forms</>}
                             {key === 'progress' && <><TrendingUp size={20} /> Progress</>}
-                            {key === 'tutoring' && <><Users size={20} /> Tutoring</>}
+                            {key === 'tutoring' && <><GraduationCap size={20} /> Tutoring</>}
                             {key === 'wellness' && <><Heart size={20} /> Wellness</>}
+                            {key === 'adminPanel' && userData?.is_admin && <><Shield size={20} /> Admin Panel</>}
                         </div>
                     ))}
                 </div>
@@ -98,11 +109,11 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                     {/* User Profile Micro */}
                     <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', background: '#f8fafc', borderRadius: '12px' }}>
                         <div style={{ width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                            {userData?.full_name ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'A'}
+                            {userData?.full_name ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'S'}
                         </div>
                         <div style={{ overflow: 'hidden' }}>
                             <div style={{ fontWeight: '600', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {userData?.full_name || 'Austin'}
+                                {userData?.full_name || 'Student'}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Student Navigator</div>
                         </div>
@@ -138,7 +149,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                         <GraduationCap size={18} /> Your Academic Success Navigator
                     </div>
                     <h1 style={{ fontSize: '2.5rem', margin: '0.5rem 0 1rem 0', fontWeight: '700' }}>
-                        Good afternoon, {userData?.full_name ? userData.full_name.split(' ')[0] : 'Austin'}!
+                        Good afternoon, {userData?.full_name ? userData.full_name.split(' ')[0] : 'Student'}!
                     </h1>
                     <p style={{ maxWidth: '500px', fontSize: '1.1rem', opacity: 0.9, marginBottom: '2rem', lineHeight: '1.6' }}>
                         {userData?.ai_insight || "Welcome to your Academic Success Navigator. I'm here to help you stay on track with your courses and goals."}
@@ -234,6 +245,7 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
     const [fullName, setFullName] = useState(userData?.full_name || '');
     const [gpa, setGpa] = useState(userData?.gpa || 0.0);
     const [onTrackScore, setOnTrackScore] = useState(userData?.on_track_score || 0);
+    const [defaultLang, setDefaultLang] = useState(localStorage.getItem('defaultLanguage') || 'English');
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -243,6 +255,7 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
                 gpa: parseFloat(gpa),
                 on_track_score: parseInt(onTrackScore)
             });
+            localStorage.setItem('defaultLanguage', defaultLang);
             onRefresh();
             onClose();
         } catch (error) {
@@ -293,6 +306,19 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
                         </div>
                     </div>
 
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Default Notes Language</label>
+                        <select
+                            value={defaultLang}
+                            onChange={(e) => setDefaultLang(e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                        >
+                            {["English", "Spanish", "Mandarin Chinese", "Hindi", "French", "Arabic", "Bengali", "Portuguese", "Russian", "Urdu"].map(lang => (
+                                <option key={lang} value={lang}>{lang}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                         <button type="button" onClick={onClose} style={{ flex: 1, padding: '0.75rem', background: '#f1f5f9', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Close</button>
                         <button type="submit" style={{ flex: 1, padding: '0.75rem', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Save Changes</button>
@@ -310,6 +336,7 @@ import SLA from './legal/SLA';
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [chatMode, setChatMode] = useState(null); // 'tutor', 'admin', 'coach', or null
+    const [chatSessionId, setChatSessionId] = useState(null);
     const [userData, setUserData] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -331,13 +358,14 @@ const Dashboard = () => {
         }
     };
 
-    const handleFeatureNavigate = (tab, mode = null) => {
+    const handleFeatureNavigate = (tab, mode = null, sessionId = null) => {
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/login');
         } else {
             setActiveTab(tab);
             setChatMode(mode);
+            setChatSessionId(sessionId);
         }
     };
 
@@ -350,8 +378,8 @@ const Dashboard = () => {
             {/* Mobile Header - Only visible on small screens */}
             <div className="mobile-only" style={{ padding: '1rem', background: 'white', borderBottom: '1px solid #e2e8f0', alignItems: 'center', justifyContent: 'space-between', zIndex: 30 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ background: '#4f46e5', padding: '6px', borderRadius: '8px' }}>
-                        <GraduationCap color="white" size={20} />
+                    <div style={{ padding: '0px', borderRadius: '8px' }}>
+                        <img src="/icon.svg" alt="Logo" style={{ width: '28px', height: '28px' }} />
                     </div>
                     <span style={{ fontWeight: '700', fontSize: '1.2rem' }}>Navigator</span>
                 </div>
@@ -369,28 +397,40 @@ const Dashboard = () => {
                     onClose={() => setIsMobileMenuOpen(false)}
                 />
 
-                <main style={{ flex: 1, padding: '2rem 3rem', overflowY: 'auto', position: 'relative' }} className="main-content">
+                <main
+                    style={{
+                        flex: 1,
+                        padding: activeTab === 'chat' ? 0 : '2rem 3rem',
+                        overflowY: activeTab === 'chat' ? 'hidden' : 'auto',
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}
+                    className="main-content"
+                >
                     {/* Responsive Padding adjustment usually handled by CSS media queries on .main-content class, or simplistic inline approach here */}
                     <style>{`
                         @media (max-width: 768px) {
-                            .main-content { padding: 1.5rem !important; }
+                            .main-content { padding: ${activeTab === 'chat' ? 0 : '1.5rem'} !important; }
                         }
                     `}</style>
 
                     {activeTab === 'dashboard' && <DashboardHome onNavigate={handleFeatureNavigate} userData={userData} onEditStats={() => handleFeatureNavigate('edit-profile')} />}
 
                     {activeTab === 'chat' && (
-                        <div style={{ height: '100%' }}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '1.5rem' }}>
+                            <h2 style={{ marginBottom: '1rem', flexShrink: 0 }}>
                                 {chatMode === 'tutor' ? 'The Tutor' :
                                     chatMode === 'admin' ? 'The Admin' :
                                         chatMode === 'coach' ? 'The Coach' : 'AI Navigator'}
                             </h2>
-                            <div style={{ height: 'calc(100% - 60px)', background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', overflow: 'hidden' }}>
-                                <ChatInterface mode={chatMode} />
+                            <div style={{ flex: 1, background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', overflow: 'hidden', minHeight: 0 }}>
+                                <ChatInterface mode={chatMode} initialSessionId={chatSessionId} />
                             </div>
                         </div>
                     )}
+
+                    {activeTab === 'history' && <History onSelectSession={(id) => handleFeatureNavigate('chat', null, id)} />}
 
                     {activeTab === 'schedule' && <BookAdvisor onBack={() => setActiveTab('dashboard')} />}
 
@@ -402,6 +442,12 @@ const Dashboard = () => {
 
                     {activeTab === 'timer' && <StudyTimer onBack={() => setActiveTab('dashboard')} />}
 
+                    {activeTab === 'smart-study' && <FlashcardGenerator />}
+
+                    {activeTab === 'voice-notes' && <LectureVoiceNotes />}
+
+                    {activeTab === 'syllabus' && <SyllabusScanner />}
+
                     {activeTab === 'forms' && <DropAddForms onBack={() => setActiveTab('dashboard')} />}
 
                     {activeTab === 'progress' && <Progress />}
@@ -411,8 +457,11 @@ const Dashboard = () => {
                     {activeTab === 'msa' && <MSA onBack={() => setActiveTab('dashboard')} />}
                     {activeTab === 'sla' && <SLA onBack={() => setActiveTab('dashboard')} />}
 
+                    {/* Social Campus */}
+                    {activeTab === 'social' && <SocialCampus />}
+
                     {/* Admin */}
-                    {activeTab === 'admin' && userData?.is_admin && <AdminPanel />}
+                    {activeTab === 'adminPanel' && userData?.is_admin && <AdminPanel />}
 
                 </main>
             </div>

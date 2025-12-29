@@ -27,6 +27,7 @@ class CanvasService:
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         async with httpx.AsyncClient() as client:
             try:
+                # logger.info(f"Canvas GET: {url} | Params: {params}")
                 response = await client.get(url, headers=self.headers, params=params, timeout=10.0)
                 response.raise_for_status()
                 return response.json()
@@ -34,7 +35,7 @@ class CanvasService:
                 logger.error(f"Canvas API error: {e.response.status_code} - {e.response.text}")
                 raise
             except Exception as e:
-                logger.error(f"Canvas connection error: {str(e)}")
+                logger.error(f"Canvas connection error: {repr(e)}")
                 raise
 
     async def get_courses(self, enrollment_state: str = "active") -> List[Dict[str, Any]]:
@@ -62,21 +63,34 @@ class CanvasService:
         # so we process all returned courses directly.
         
         # include[] must be passed exactly as Canvas expects
-    async def get_student_grade(self, course_id: int, student_name: str) -> Optional[Dict]:
+    async def get_student_grade(self, course_id: int, student_email: str) -> Optional[Dict]:
         """
-        For teachers: Search for a specific student (e.g., 'Austin') and get their grade.
+        For teachers: Search for a specific student by email and get their grade.
         """
         try:
-            # Search for the user by name
+            # Search for the user by email
             params = {
-                "search_term": student_name,
-                "include[]": ["enrollments"] 
+                "search_term": student_email,
+                "include[]": ["enrollments", "email", "avatar_url"] 
             }
             users = await self._get(f"courses/{course_id}/search_users", params=params)
             
+            target_user = None
             if users and isinstance(users, list) and len(users) > 0:
-                # Assuming the first match is our target 'Austin'
-                target_user = users[0]
+                # Try to exact match email first
+                for u in users:
+                    u_email = u.get("email", "").lower()
+                    u_login = u.get("login_id", "").lower()
+                    search = student_email.lower()
+                    
+                    if search == u_email or search == u_login:
+                        target_user = u
+                        break
+                
+                # Fallback to first result if strict match fails (search_term is usually good)
+                if not target_user:
+                    target_user = users[0]
+
                 enrollments = target_user.get("enrollments", [])
                 
                 for e in enrollments:
@@ -88,13 +102,15 @@ class CanvasService:
                             "score": grades.get("current_score")
                         }
         except Exception as e:
-           logger.warning(f"Error fetching grade for student {student_name} in course {course_id}: {e}")
+           logger.warning(f"Error fetching grade for student {student_email} in course {course_id}: {e}")
         
         return None
 
-    async def get_course_grades(self) -> Dict[str, Dict[str, Any]]:
+    async def get_course_grades(self, target_student_email: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
         """
         Fetch current grades for all active courses.
+        If a target_student_email is provided and the token owner is a teacher, 
+        it attempts to fetch that specific student's grade.
         """
         # include[] must be passed exactly as Canvas expects
         params = {"enrollment_state": "active", "include[]": "total_scores"}
@@ -123,10 +139,10 @@ class CanvasService:
                 if e.get("type") == "teacher" or e.get("role") == "TeacherEnrollment":
                     is_teacher = True
 
-            # 3. Teacher Override: Fetch "Austin's" grade explicitly
-            # If we are a teacher, we want to see the grade for 'Austin' (the App User)
-            if is_teacher and list(grades_data[name].values()) == ["N/A", "N/A"]:
-                student_grade = await self.get_student_grade(course_id, "Austin")
+            # 3. Teacher Override: Fetch User's grade explicitly
+            # If we are a teacher, we want to see the grade for the specific App User
+            if is_teacher and list(grades_data[name].values()) == ["N/A", "N/A"] and target_student_email:
+                student_grade = await self.get_student_grade(course_id, target_student_email)
                 if student_grade:
                      grades_data[name] = {
                          "grade": student_grade.get("grade") or "N/A",
@@ -135,6 +151,11 @@ class CanvasService:
         
         return grades_data
 
+
+
+    async def get_course_modules(self, course_id: int) -> List[Dict[str, Any]]:
+        """Fetch modules for a specific course."""
+        return await self._get(f"courses/{course_id}/modules", params={"include[]": "items"})
 
     def generate_ai_suggestion(self, course_name: str, grade: str) -> str:
         """
@@ -175,18 +196,24 @@ class CanvasService:
         Synchronizes Canvas course data into the local database (PostgreSQL/SQLite).
         This updates the 'Course' table in our app.
         """
-        from app.models import Course
+        from app.models import Course, User
         from sqlmodel import select
         import logging
 
         logger = logging.getLogger("uvicorn")
         logger.info(f"Starting Canvas Sync for user_id={user_id}...")
+        
+        # Get user to match email
+        user = db_session.get(User, user_id)
+        if not user:
+            logger.error(f"User {user_id} not found during sync.")
+            return 0
 
         courses_data = await self.get_courses()
         synced_count = 0
 
-        # Fetch grades to sync as well
-        grades_map = await self.get_course_grades()
+        # Fetch grades to sync as well, passing user email for lookup
+        grades_map = await self.get_course_grades(target_student_email=user.email)
 
         for c_data in courses_data:
             # Skip courses without a name or code (some API responses are sparse)
@@ -288,8 +315,6 @@ class CanvasService:
                       f"{failing_courses[0]} needs immediate attention."
                       
         # Update User
-        from app.models import User
-        user = db_session.get(User, user_id)
         if user:
             user.ai_insight = insight
             db_session.add(user)

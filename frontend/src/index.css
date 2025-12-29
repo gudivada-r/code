@@ -72,6 +72,8 @@ body {
     width: 280px !important;
     /* Fixed width for drawer */
     box-shadow: var(--shadow-lg);
+    z-index: 1000 !important;
+    /* Ensure it is on top */
   }
 
   .sidebar.open {
@@ -83,7 +85,7 @@ body {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 40;
+    z-index: 999;
     display: none;
   }
 
@@ -220,6 +222,8 @@ body {
   height: 100%;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
   z-index: 10;
+  width: 260px;
+  flex-shrink: 0;
 }
 
 .nav-item {

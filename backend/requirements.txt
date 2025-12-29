@@ -12,3 +12,4 @@ python-dotenv
 httpx
 psycopg2-binary
 bcrypt
+google-generativeai
