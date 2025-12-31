@@ -16,9 +16,10 @@ const History = ({ onSelectSession }) => {
         try {
             const res = await api.get('/api/chat/history/sessions');
             setSessions(res.data);
-        } catch (error) {
-            console.error("Failed to load history:", error);
+        } catch (_error) {
+            console.error("Failed to load history:");
         } finally {
+
             setLoading(false);
         }
     };

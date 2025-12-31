@@ -17,10 +17,9 @@ backend/load_testing.py
 backend/seed_admins.py
 backend/migrate_*.py
 
-# Exclude sample files
+# Exclude specific heavy sample files
 sample_lecture.mp3
-*.png
-*.svg
+# student_navigator_logo.png is extra, keep logo.png
 student_navigator_logo.png
 
 # Exclude frontend build artifacts

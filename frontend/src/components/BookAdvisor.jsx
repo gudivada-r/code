@@ -7,7 +7,7 @@ const BookAdvisor = ({ onBack }) => {
     const [advisorList, setAdvisorList] = useState([]);
     const [loadingAdvisors, setLoadingAdvisors] = useState(true);
     const [fetchError, setFetchError] = useState(null);
-    const [step, setStep] = useState(1);
+
     const [formData, setFormData] = useState({
         advisor_name: '',
         date: '',
@@ -72,7 +72,8 @@ const BookAdvisor = ({ onBack }) => {
                 </p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <button
-                        onClick={() => { setStatus(null); setFormData({ advisor_name: '', date: '', time: '', reason: '' }); setStep(1); }}
+                        onClick={() => { setStatus(null); setFormData({ advisor_name: '', date: '', time: '', reason: '' }); }}
+
                         style={{ padding: '12px 24px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer' }}>
                         Book Another
                     </button>

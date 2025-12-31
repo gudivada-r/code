@@ -15,12 +15,28 @@ import FlashcardGenerator from './FlashcardGenerator';
 import SyllabusScanner from './SyllabusScanner';
 import SocialCampus from './SocialCampus';
 import LectureVoiceNotes from './LectureVoiceNotes';
+import HoldsCenter from './HoldsCenter';
+import FinancialAidNexus from './FinancialAidNexus';
+import CareerPathfinder from './CareerPathfinder';
+import PrivacyPolicy from './legal/PrivacyPolicy';
+import MSA from './legal/MSA';
+import SLA from './legal/SLA';
+import Footer from './Footer';
+import FacultyDashboard from './FacultyDashboard';
+import DegreeRoadmap from './DegreeRoadmap';
+
+
 import {
     LayoutDashboard, MessageSquare, Calendar, BookOpen,
-    TrendingUp, User, Settings, LogOut, Search, Clock,
-    Users, FileText, Heart, GraduationCap, ChevronRight, Edit3, Menu, X, Shield, History as HistoryIcon, Brain, ScanLine, Mic
+    TrendingUp, User, Settings, LogOut, Clock,
+    Users, FileText, Heart, GraduationCap, ChevronRight, Edit3, Menu, X, Shield, History as HistoryIcon, Brain, ScanLine, Mic, ShieldAlert, AlertTriangle, Briefcase, Map
 } from 'lucide-react';
+
 import { motion } from 'framer-motion';
+import logoAsset from '../assets/logo.png';
+
+
+
 
 const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
     const navigate = useNavigate();
@@ -29,12 +45,14 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
     const handleLogin = () => { navigate('/login'); };
 
     const handleProtectedTab = (tab) => {
-        if (!isLoggedIn) {
+        const publicTabs = ['dashboard', 'courses', 'wellness', 'social'];
+        if (!isLoggedIn && !publicTabs.includes(tab)) {
+            // If trying to access a private tab (like 'settings' or 'chat') without login -> redirect
             navigate('/login');
         } else {
             onTabChange(tab);
             if (window.innerWidth <= 768) {
-                onClose(); // Close sidebar on mobile after selection
+                onClose();
             }
         }
     };
@@ -50,13 +68,14 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
             <div className={`sidebar ${isOpen ? 'open' : ''}`}>
                 {/* Logo & Close Button */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', paddingLeft: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{ padding: '4px', borderRadius: '10px' }}>
-                            <img src="/icon.svg" alt="Logo" style={{ width: '32px', height: '32px' }} />
+                            <img src={logoAsset} alt="Logo" style={{ width: '42px', height: '42px', borderRadius: '8px' }} />
                         </div>
+
                         <div>
-                            <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>Navigator</h2>
-                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Student Success</span>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, lineHeight: 1.1 }}>Student Success</h2>
+                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Navigator</span>
                         </div>
                     </div>
                     {/* Mobile Close Button */}
@@ -68,64 +87,83 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                 {/* Nav Items */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto' }}>
                     {/* ... existing dynamic nav items ... */}
-                    {['dashboard', 'chat', 'history', 'schedule', 'courses', 'timer', 'smart-study', 'voice-notes', 'syllabus', 'social', 'forms', 'progress', 'tutoring', 'wellness', 'adminPanel'].map(key => (
-                        <div
-                            key={key}
-                            className={`nav-item ${activeTab === key ? 'active' : ''}`}
-                            onClick={() => handleProtectedTab(key)}
-                        >
-                            {key === 'dashboard' && <><LayoutDashboard size={20} /> Dashboard</>}
-                            {key === 'chat' && <><MessageSquare size={20} /> AI Navigator</>}
-                            {key === 'history' && <><HistoryIcon size={20} /> My History</>}
-                            {key === 'schedule' && <><Calendar size={20} /> Schedule</>}
-                            {key === 'courses' && <><BookOpen size={20} /> Courses</>}
-                            {key === 'timer' && <><Clock size={20} /> Study Timer</>}
-                            {key === 'smart-study' && <><Brain size={20} /> Smart Study</>}
-                            {key === 'voice-notes' && <><Mic size={20} /> Lecture Notes</>}
-                            {key === 'syllabus' && <><ScanLine size={20} /> Syllabus Scanner</>}
-                            {key === 'social' && <><Users size={20} /> Social Campus</>}
-                            {key === 'forms' && <><FileText size={20} /> Drop/Add Forms</>}
-                            {key === 'progress' && <><TrendingUp size={20} /> Progress</>}
-                            {key === 'tutoring' && <><GraduationCap size={20} /> Tutoring</>}
-                            {key === 'wellness' && <><Heart size={20} /> Wellness</>}
-                            {key === 'adminPanel' && userData?.is_admin && <><Shield size={20} /> Admin Panel</>}
-                        </div>
-                    ))}
-                </div>
+                    {/* MAIN NAVIGATION */}
+                    <div className="section-title">Home</div>
+                    <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => handleProtectedTab('dashboard')}><LayoutDashboard size={20} /> Dashboard</div>
+                    <div className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleProtectedTab('chat')}><MessageSquare size={20} /> AI Navigator</div>
 
-                {/* Bottom Config */}
-                <div style={{ marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
-                    <div className="nav-item" onClick={() => handleProtectedTab('edit-profile')}><Settings size={20} /> Settings</div>
-                    {isLoggedIn ? (
-                        <div onClick={handleLogout} className="nav-item" style={{ color: '#ef4444' }}>
-                            <LogOut size={20} /> Logout
-                        </div>
-                    ) : (
-                        <div onClick={handleLogin} className="nav-item" style={{ color: '#4f46e5' }}>
-                            <User size={20} /> Login / Sign Up
-                        </div>
+                    <div className="section-title">Academics</div>
+                    <div className={`nav-item ${activeTab === 'degree-roadmap' ? 'active' : ''}`} onClick={() => handleProtectedTab('degree-roadmap')}><Map size={20} /> Degree Roadmap</div>
+                    <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => handleProtectedTab('courses')}><BookOpen size={20} /> Courses</div>
+                    <div className={`nav-item ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => handleProtectedTab('schedule')}><Calendar size={20} /> Schedule</div>
+                    <div className={`nav-item ${activeTab === 'syllabus' ? 'active' : ''}`} onClick={() => handleProtectedTab('syllabus')}><ScanLine size={20} /> Syllabus Scanner</div>
+                    <div className={`nav-item ${activeTab === 'voice-notes' ? 'active' : ''}`} onClick={() => handleProtectedTab('voice-notes')}><Mic size={20} /> Lecture Notes</div>
+
+                    <div className="section-title">My Records</div>
+                    <div className={`nav-item ${activeTab === 'forms' ? 'active' : ''}`} onClick={() => handleProtectedTab('forms')}><FileText size={20} /> Drop/Add Forms</div>
+                    <div className={`nav-item ${activeTab === 'progress' ? 'active' : ''}`} onClick={() => handleProtectedTab('progress')}><TrendingUp size={20} /> Progress</div>
+                    <div className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => handleProtectedTab('history')}><HistoryIcon size={20} /> My History</div>
+
+                    <div className="section-title">Tools & Support</div>
+                    <div className={`nav-item ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => handleProtectedTab('timer')}><Clock size={20} /> Study Timer</div>
+                    <div className={`nav-item ${activeTab === 'smart-study' ? 'active' : ''}`} onClick={() => handleProtectedTab('smart-study')}><Brain size={20} /> Flashcards</div>
+                    <div className={`nav-item ${activeTab === 'tutoring' ? 'active' : ''}`} onClick={() => handleProtectedTab('tutoring')}><GraduationCap size={20} /> Tutoring Center</div>
+                    <div className={`nav-item ${activeTab === 'financial' ? 'active' : ''}`} onClick={() => handleProtectedTab('financial')}><GraduationCap size={20} /> Financial Nexus</div>
+                    <div className={`nav-item ${activeTab === 'career' ? 'active' : ''}`} onClick={() => handleProtectedTab('career')}><Briefcase size={20} /> Career Pathfinder</div>
+                    <div className={`nav-item ${activeTab === 'holds' ? 'active' : ''}`} onClick={() => handleProtectedTab('holds')}><ShieldAlert size={20} /> Holds & Alerts</div>
+
+                    <div className="section-title">Campus Life</div>
+                    <div className={`nav-item ${activeTab === 'social' ? 'active' : ''}`} onClick={() => handleProtectedTab('social')}><Users size={20} /> Social Campus</div>
+                    <div className={`nav-item ${activeTab === 'wellness' ? 'active' : ''}`} onClick={() => handleProtectedTab('wellness')}><Heart size={20} /> Wellness</div>
+
+                    {(userData?.is_faculty || userData?.is_admin) && (
+                        <>
+                            <div className="section-title">Faculty & Staff</div>
+                            <div className={`nav-item ${activeTab === 'faculty' ? 'active' : ''}`} onClick={() => handleProtectedTab('faculty')}><Users size={20} /> Faculty Portal</div>
+                        </>
                     )}
 
-                    {/* User Profile Micro */}
-                    <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', background: '#f8fafc', borderRadius: '12px' }}>
-                        <div style={{ width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                            {userData?.full_name ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'S'}
-                        </div>
-                        <div style={{ overflow: 'hidden' }}>
-                            <div style={{ fontWeight: '600', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {userData?.full_name || 'Student'}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Student Navigator</div>
-                        </div>
-                    </div>
+                    {userData?.is_admin && (
+                        <>
+                            <div className="section-title">Admin</div>
+                            <div className={`nav-item ${activeTab === 'adminPanel' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminPanel')}><Shield size={20} /> Admin Panel</div>
+                        </>
+                    )}
 
-                    {/* Legal Footer */}
-                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9', fontSize: '0.65rem', color: '#94a3b8' }}>
-                        <div style={{ marginBottom: '0.25rem' }}>© 2025 Student Success</div>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <span onClick={() => handleProtectedTab('privacy')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>Privacy</span>
-                            <span onClick={() => handleProtectedTab('msa')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>MSA</span>
-                            <span onClick={() => handleProtectedTab('sla')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>SLA</span>
+                    {/* Bottom Config */}
+                    <div style={{ marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                        <div className="nav-item" onClick={() => handleProtectedTab('edit-profile')}><Settings size={20} /> Settings</div>
+                        {isLoggedIn ? (
+                            <div onClick={handleLogout} className="nav-item" style={{ color: '#ef4444' }}>
+                                <LogOut size={20} /> Logout
+                            </div>
+                        ) : (
+                            <div onClick={handleLogin} className="nav-item" style={{ color: '#4f46e5' }}>
+                                <User size={20} /> Login / Sign Up
+                            </div>
+                        )}
+
+                        {/* User Profile Micro */}
+                        <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', background: '#f8fafc', borderRadius: '12px' }}>
+                            <div style={{ width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                {userData?.full_name ? userData.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'S'}
+                            </div>
+                            <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontWeight: '600', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {userData?.full_name || 'Student'}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Student Navigator</div>
+                            </div>
+                        </div>
+
+                        {/* Legal Footer */}
+                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9', fontSize: '0.65rem', color: '#94a3b8' }}>
+                            <div style={{ marginBottom: '0.25rem' }}>© 2025 Student Success</div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <span onClick={() => handleProtectedTab('privacy')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>Privacy</span>
+                                <span onClick={() => handleProtectedTab('msa')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>MSA</span>
+                                <span onClick={() => handleProtectedTab('sla')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>SLA</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,7 +175,7 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
 
 const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
     return (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        <div style={{ maxWidth: '1600px', margin: '0 auto', width: '100%', padding: '0 1rem' }}>
             {/* Hero Section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -184,11 +222,12 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
             <h3 className="section-title">Quick Actions</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                 {[
+                    { icon: ShieldAlert, color: '#ef4444', label: 'Holds & Alerts', sub: 'Action required', action: 'holds' },
                     { icon: Calendar, color: '#6366f1', label: 'Book Advisor', sub: 'Schedule a meeting', action: 'schedule' },
                     { icon: BookOpen, color: '#10b981', label: 'Tutoring Center', sub: 'Get study help', action: 'tutoring' },
                     { icon: FileText, color: '#f59e0b', label: 'Drop/Add Forms', sub: 'Deadline: Oct 15', action: 'forms' },
-                    { icon: Heart, color: '#ec4899', label: 'Wellness Check', sub: 'How are you feeling?', action: 'wellness' },
                     { icon: Clock, color: '#eab308', label: 'Study Timer', sub: 'Stay focused', action: 'timer' },
+                    { icon: Briefcase, color: '#ec4899', label: 'Career Finder', sub: 'Find internships', action: 'career' },
                 ].map((item, idx) => (
                     <motion.div
                         whileHover={{ scale: 1.02 }}
@@ -244,8 +283,13 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
 const EditProfileModal = ({ userData, onClose, onRefresh }) => {
     const [fullName, setFullName] = useState(userData?.full_name || '');
     const [gpa, setGpa] = useState(userData?.gpa || 0.0);
-    const [onTrackScore, setOnTrackScore] = useState(userData?.on_track_score || 0);
+    const [_onTrackScore, _setOnTrackScore] = useState(userData?.on_track_score || 0);
+
+    const [major, setMajor] = useState(userData?.major || '');
+    const [background, setBackground] = useState(userData?.background || '');
+    const [interests, setInterests] = useState(userData?.interests || '');
     const [defaultLang, setDefaultLang] = useState(localStorage.getItem('defaultLanguage') || 'English');
+
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -253,9 +297,14 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
             await api.put('/api/users/me', {
                 full_name: fullName,
                 gpa: parseFloat(gpa),
-                on_track_score: parseInt(onTrackScore)
+                on_track_score: parseInt(_onTrackScore),
+
+                major,
+                background,
+                interests
             });
             localStorage.setItem('defaultLanguage', defaultLang);
+
             onRefresh();
             onClose();
         } catch (error) {
@@ -298,16 +347,32 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Current GPA</label>
-                            <input type="number" step="0.1" max="4.0" value={gpa} onChange={(e) => setGpa(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                            <input type="number" step="0.1" max="4.0" value={gpa} onChange={(e) => setGpa(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e880' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>On-track Score (%)</label>
-                            <input type="number" value={onTrackScore} onChange={(e) => setOnTrackScore(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>University Email</label>
+                            <div style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b' }}>{userData?.email}</div>
                         </div>
                     </div>
 
                     <div>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Major / Study Track</label>
+                        <input type="text" value={major} onChange={(e) => setMajor(e.target.value)} placeholder="e.g. Computer Science" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Personal Background (Heritage, Identity, Goals)</label>
+                        <textarea value={background} onChange={(e) => setBackground(e.target.value)} placeholder="Helps with matching diversity scholarships..." style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', height: '80px', resize: 'none' }} />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Research Interests / Skills</label>
+                        <textarea value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="e.g. Machine Learning, Renaissance Art, Sustainability..." style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', height: '60px', resize: 'none' }} />
+                    </div>
+
+                    <div>
                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Default Notes Language</label>
+
                         <select
                             value={defaultLang}
                             onChange={(e) => setDefaultLang(e.target.value)}
@@ -329,17 +394,16 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
     );
 };
 
-import PrivacyPolicy from './legal/PrivacyPolicy';
-import MSA from './legal/MSA';
-import SLA from './legal/SLA';
 
 const Dashboard = () => {
+
     const [activeTab, setActiveTab] = useState('dashboard');
     const [chatMode, setChatMode] = useState(null); // 'tutor', 'admin', 'coach', or null
     const [chatSessionId, setChatSessionId] = useState(null);
     const [userData, setUserData] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [holds, setHolds] = useState([]);
     const navigate = useNavigate();
 
     const fetchUser = async () => {
@@ -358,6 +422,17 @@ const Dashboard = () => {
         }
     };
 
+    const fetchHolds = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const res = await api.get('/api/holds');
+            setHolds(res.data);
+        } catch (error) {
+            console.error("Failed to fetch holds:", error);
+        }
+    };
+
     const handleFeatureNavigate = (tab, mode = null, sessionId = null) => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -370,8 +445,12 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchUser();
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchHolds();
     }, []);
+
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: '#f8fafc', flexDirection: 'column' }}>
@@ -379,8 +458,9 @@ const Dashboard = () => {
             <div className="mobile-only" style={{ padding: '1rem', background: 'white', borderBottom: '1px solid #e2e8f0', alignItems: 'center', justifyContent: 'space-between', zIndex: 30 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ padding: '0px', borderRadius: '8px' }}>
-                        <img src="/icon.svg" alt="Logo" style={{ width: '28px', height: '28px' }} />
+                        <img src={logoAsset} alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
                     </div>
+
                     <span style={{ fontWeight: '700', fontSize: '1.2rem' }}>Navigator</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1e293b' }}>
@@ -415,14 +495,46 @@ const Dashboard = () => {
                         }
                     `}</style>
 
-                    {activeTab === 'dashboard' && <DashboardHome onNavigate={handleFeatureNavigate} userData={userData} onEditStats={() => handleFeatureNavigate('edit-profile')} />}
+                    {activeTab === 'dashboard' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {holds.some(h => h.status === 'active') && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={() => setActiveTab('holds')}
+                                    style={{
+                                        background: '#fee2e2',
+                                        border: '1px solid #fecaca',
+                                        padding: '1rem 1.5rem',
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <AlertTriangle color="#ef4444" size={20} />
+                                        <span style={{ color: '#991b1b', fontWeight: '700' }}>
+                                            You have {holds.filter(h => h.status === 'active').length} active hold(s) or alert(s) that require your attention.
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontWeight: '700', fontSize: '0.9rem' }}>
+                                        View Details <ChevronRight size={16} />
+                                    </div>
+                                </motion.div>
+                            )}
+                            <DashboardHome onNavigate={handleFeatureNavigate} userData={userData} onEditStats={() => handleFeatureNavigate('edit-profile')} />
+                        </div>
+                    )}
 
                     {activeTab === 'chat' && (
                         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '1.5rem' }}>
                             <h2 style={{ marginBottom: '1rem', flexShrink: 0 }}>
                                 {chatMode === 'tutor' ? 'The Tutor' :
                                     chatMode === 'admin' ? 'The Admin' :
-                                        chatMode === 'coach' ? 'The Coach' : 'AI Navigator'}
+                                        chatMode === 'coach' ? 'The Coach' :
+                                            chatMode === 'fafsa' ? 'AI FAFSA Expert' : 'AI Navigator'}
                             </h2>
                             <div style={{ flex: 1, background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', overflow: 'hidden', minHeight: 0 }}>
                                 <ChatInterface mode={chatMode} initialSessionId={chatSessionId} />
@@ -448,7 +560,14 @@ const Dashboard = () => {
 
                     {activeTab === 'syllabus' && <SyllabusScanner />}
 
+                    {activeTab === 'holds' && <HoldsCenter />}
+
+                    {activeTab === 'financial' && <FinancialAidNexus onNavigate={handleFeatureNavigate} />}
+
+                    {activeTab === 'career' && <CareerPathfinder />}
+
                     {activeTab === 'forms' && <DropAddForms onBack={() => setActiveTab('dashboard')} />}
+
 
                     {activeTab === 'progress' && <Progress />}
 
@@ -460,9 +579,15 @@ const Dashboard = () => {
                     {/* Social Campus */}
                     {activeTab === 'social' && <SocialCampus />}
 
+                    {/* Faculty */}
+                    {activeTab === 'faculty' && <FacultyDashboard />}
+
                     {/* Admin */}
+                    {/* Main Features */}
+                    {activeTab === 'degree-roadmap' && <DegreeRoadmap />}
                     {activeTab === 'adminPanel' && userData?.is_admin && <AdminPanel />}
 
+                    {activeTab !== 'chat' && <Footer onNavigate={(tab) => setActiveTab(tab)} />}
                 </main>
             </div>
 

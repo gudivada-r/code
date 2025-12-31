@@ -89,8 +89,8 @@ async def tutor_agent(state: AgentState):
         "messages": [AIMessage(content=message)],
         "final_response": {
             "message_content": message,
-            "cited_sources": ["Tutoring Center Handbook"],
-            "action_items": ["Review Chapter 4", "Visit Math Lab"]
+            "cited_sources": [],
+            "action_items": []
         }
     }
 
@@ -109,8 +109,8 @@ def admin_agent(state: AgentState):
         "messages": [AIMessage(content=message)],
         "final_response": {
             "message_content": message,
-            "cited_sources": ["University Registrar Policy"],
-            "action_items": ["Check Financial Aid Status via Portal"]
+            "cited_sources": [],
+            "action_items": []
         }
     }
 
@@ -128,8 +128,8 @@ def wellness_agent(state: AgentState):
         "messages": [AIMessage(content=message)],
         "final_response": {
             "message_content": message,
-            "cited_sources": ["Counseling Services FAQ"],
-            "action_items": ["Schedule a counseling session", "Take a 10-minute walk"]
+            "cited_sources": [],
+            "action_items": []
         }
     }
 
@@ -143,7 +143,7 @@ def crisis_node(state: AgentState):
         "final_response": {
             "message_content": message,
             "cited_sources": ["Emergency Protocol"],
-            "action_items": ["CALL 988 IMMEDIATELEY", "Go to safe location"]
+            "action_items": ["CALL 988 IMMEDIATELY", "Go to safe location"]
         }
     }
     

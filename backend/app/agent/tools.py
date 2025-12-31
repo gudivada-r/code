@@ -1,9 +1,8 @@
 from sqlmodel import Session, select
 from typing import List, Dict
 from datetime import datetime, timedelta
-from app.auth import engine
-from app.models import Course
-
+# from app.auth import engine -- Remove this to avoid circular import if auth imports models
+# from app.models import Course -- Remove this too
 from app.integrations.lms.canvas import CanvasService
 
 class LMSTool:
@@ -31,7 +30,8 @@ class LMSTool:
         
         if not token:
             # Final emergency fallback for demo only
-            token = "7~3LxQLMnxX4ZRzFteTC97YuyJuPaR92Aef88eLEB3M9YLtmXQ8ezH7TkPXDk4cYVx"
+            # Final emergency fallback for demo only
+            token = ""
             
         self.canvas = CanvasService(base_url=base_url, access_token=token)
 
@@ -47,6 +47,8 @@ class LMSTool:
                     return {name: f"{data['score']}% ({data['grade']})" for name, data in lms_grades.items()}
 
             # 2. Fallback to DB
+            from app.auth import engine
+            from app.models import Course
             with Session(engine) as session:
                 statement = select(Course).where(Course.user_id == int(student_id))
                 courses = session.exec(statement).all()

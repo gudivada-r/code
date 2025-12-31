@@ -7,16 +7,21 @@ class User(SQLModel, table=True):
     email: str = Field(unique=True, index=True)
     password_hash: str
     full_name: Optional[str] = None
+    major: Optional[str] = None
+    background: Optional[str] = None
+    interests: Optional[str] = None
     gpa: float = Field(default=0.0)
     on_track_score: int = Field(default=0)
     ai_insight: Optional[str] = Field(default=None)
     is_admin: bool = Field(default=False)
+    is_faculty: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     
     chat_sessions: List["ChatSession"] = Relationship(back_populates="user")
     courses: List["Course"] = Relationship(back_populates="user")
     form_requests: List["FormRequest"] = Relationship(back_populates="user")
+    holds: List["StudentHold"] = Relationship(back_populates="user")
 
 class ChatSession(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -118,5 +123,36 @@ class LectureNote(SQLModel, table=True):
     language: str = Field(default="English")
     duration_seconds: int = Field(default=0)
     is_bookmarked: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class StudentHold(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    item_type: str = Field(default="hold") # "hold", "alert", "task"
+    category: str = Field(default="Administrative") # "Financial", "Academic", "Administrative"
+    title: str
+    description: str
+    amount: float = Field(default=0.0)
+    status: str = Field(default="active") # "active", "resolved", "completed"
+    due_date: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    user: User = Relationship(back_populates="holds")
+
+class Scholarship(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    title: str
+    description: str
+    amount: float
+    deadline: datetime
+    requirements: str # Criteria description
+    category: str # "Merit", "Need-based", "Diversity", "STEM"
+    provider: str
+
+class PersonalizedStatement(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    scholarship_id: int = Field(foreign_key="scholarship.id")
+    draft_content: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
 

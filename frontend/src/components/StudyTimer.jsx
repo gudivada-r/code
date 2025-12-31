@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Clock, Play, Pause, RotateCcw, Coffee, BookOpen,
-    Settings, Volume2, VolumeX, CheckCircle,
+    Settings, Volume2, VolumeX,
     ChevronRight, Timer, Brain, Zap, ChevronLeft
 } from 'lucide-react';
+
 
 const StudyTimer = ({ onBack }) => {
     const [timeLeft, setTimeLeft] = useState(25 * 60);
@@ -21,24 +22,11 @@ const StudyTimer = ({ onBack }) => {
     });
 
     const timerRef = useRef(null);
-    const audioRef = useRef(null);
+
+
 
     // Audio setup (using a public sound or keeping it silent for now)
     // For now, let's focus on the visual and logic.
-
-    useEffect(() => {
-        if (isRunning && timeLeft > 0) {
-            timerRef.current = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
-            }, 1000);
-        } else if (timeLeft === 0) {
-            handleTimerComplete();
-        } else {
-            clearInterval(timerRef.current);
-        }
-
-        return () => clearInterval(timerRef.current);
-    }, [isRunning, timeLeft]);
 
     const handleTimerComplete = () => {
         setIsRunning(false);
@@ -75,6 +63,21 @@ const StudyTimer = ({ onBack }) => {
         setIsRunning(false);
         setTimeLeft(settings[newMode] * 60);
     };
+
+    useEffect(() => {
+        if (isRunning && timeLeft > 0) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prev) => prev - 1);
+            }, 1000);
+        } else if (timeLeft === 0) {
+            handleTimerComplete();
+        } else {
+            clearInterval(timerRef.current);
+        }
+
+        return () => clearInterval(timerRef.current);
+    }, [isRunning, timeLeft, handleTimerComplete]);
+
 
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);

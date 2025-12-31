@@ -5,7 +5,7 @@ This project is configured for a **unified deployment** on [Vercel](https://verc
 ## 1. Prerequisites
 - A Vercel account.
 - [Vercel CLI](https://vercel.com/download) installed (`npm install -g vercel`).
-- OpenAI API Key.
+- [Google Gemini API Key](https://aistudio.google.com/app/apikey).
 
 ## 2. Deployment Steps
 
@@ -17,14 +17,14 @@ This project is configured for a **unified deployment** on [Vercel](https://verc
    - When asked for "Output Directory" or "Build Command", the settings in `vercel.json` will take care of it automatically.
 4. **Environment Variables**:
    Go to the Vercel Dashboard for your project -> Settings -> Environment Variables and add:
-   - `OPENAI_API_KEY`: Your OpenAI key.
-   - `DATABASE_URL`: (Optional) Use a persistent DB URL like Neon (Postgres). If left blank, it uses a non-persistent SQLite file.
+   - `GOOGLE_API_KEY`: Your Gemini API key.
+   - `DATABASE_URL`: (Optional) Use a persistent DB URL like Neon (Postgres) or Supabase. If left blank, it uses a non-persistent SQLite file at `/tmp/database.db`.
 
 ### Method B: GitHub Integration
 1. Push this code to a GitHub repository.
 2. Import the project in Vercel.
 3. Vercel will detect the `vercel.json` and deploy both the API and the Frontend.
-4. Add your `OPENAI_API_KEY` in the Vercel project settings.
+4. Add your `GOOGLE_API_KEY` in the Vercel project settings.
 
 ## 3. Persistent Database
 The current setup uses **SQLite** at `/tmp/database.db` on Vercel. 

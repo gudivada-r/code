@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { Users, Search, BookOpen, Star, Calendar, Clock, ChevronRight, CheckCircle } from 'lucide-react';
+import { Search, Star, Calendar, Clock, ChevronRight, CheckCircle } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Hardcoded tutors removed, using state instead
@@ -72,7 +73,8 @@ const TutoringCenter = () => {
         }, 2000);
     };
 
-    const AvailabilityView = () => (
+    const renderAvailabilityView = () => (
+
         <div className="card-white" style={{ padding: '0', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
             <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
@@ -283,7 +285,8 @@ const TutoringCenter = () => {
                         </>
                     )}
 
-                    {view === 'availability' && <AvailabilityView />}
+                    {view === 'availability' && renderAvailabilityView()}
+
 
                     {view === 'sessions' && (
                         <div style={{ display: 'grid', gap: '1rem' }}>

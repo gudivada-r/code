@@ -6,7 +6,7 @@ import os
 from pydantic import BaseModel
 
 from app.auth import get_session, create_access_token, get_password_hash, verify_password, get_current_user
-from app.models import ChatSession, ChatMessage, Tutor, User
+from app.models import ChatSession, ChatMessage, Tutor, User, StudentHold
 from datetime import datetime
 from app.integrations.lms.canvas import CanvasService
 
@@ -300,6 +300,7 @@ async def generate_flashcards(request: FlashcardRequest, current_user: User = De
             is_topic_request = False
     
     # 1. Gemini Generation (Preferred)
+    debug_info = "Unknown Error"
     api_key = os.environ.get("GOOGLE_API_KEY")
     print(f"DEBUG FLASHCARDS: API Key present? {bool(api_key)}")
     if api_key:
@@ -312,9 +313,9 @@ async def generate_flashcards(request: FlashcardRequest, current_user: User = De
             model = genai.GenerativeModel('gemini-flash-latest')
             
             if is_topic_request:
-                prompt = f"Generate exactly 20 flashcards for the topic: '{topic_query}'. Return valid JSON array of objects with 'front' and 'back' keys."
+                prompt = f"Generate exactly 8 flashcards for the topic: '{topic_query}'. Return valid JSON array of objects with 'front' and 'back' keys."
             else:
-                prompt = f"Extract exactly 20 flashcards from the following notes. Return valid JSON array of objects with 'front' and 'back' keys.\n\nNotes:\n{request.note_content[:4000]}"
+                prompt = f"Extract exactly 8 flashcards from the following notes. Return valid JSON array of objects with 'front' and 'back' keys.\n\nNotes:\n{request.note_content[:2000]}"
 
             print(f"DEBUG FLASHCARDS: Sending prompt to Gemini...")
             response = model.generate_content(
@@ -339,22 +340,37 @@ async def generate_flashcards(request: FlashcardRequest, current_user: User = De
             
         except Exception as e:
             import traceback
+            # Try to extract clean message from Google API error
+            error_str = str(e)
+            if "SERVICE_DISABLED" in error_str:
+                debug_info = "Google API Service is Disabled. Enable 'Generative Language API' in Google Cloud Console."
+            elif "API_KEY_INVALID" in error_str or "403" in error_str:
+                debug_info = "Invalid or Blocked API Key."
+            else:
+                # Regex mock or simple find
+                import re
+                match = re.search(r'message: "(.*?)"', error_str)
+                if match:
+                    debug_info = f"Google Error: {match.group(1)}"
+                else:
+                    debug_info = f"Error: {error_str[:100]}..."
             print(f"DEBUG: Gemini Flashcard Gen Failed. Error: {e}")
             print(f"DEBUG: Traceback: {traceback.format_exc()}")
             # Fallthrough to mock
             
     else:
         print("DEBUG FLASHCARDS: No API key found, using mock data")
+        debug_info = "GOOGLE_API_KEY not found"
             
     # 2. Mock Logic (Fallback)
     if is_topic_request:
         topic = topic_query or "General Knowledge"
         cards = []
-        for i in range(1, 21):
+        for i in range(1, 9): # Reduced to 8 to match request
             cards.append({
                 "id": f"mock-{i}", 
                 "front": f"Concept {i} of {topic}", 
-                "back": f"This is the detailed explanation for concept {i} related to {topic}. It is automatically generated since the AI service is offline."
+                "back": f"This is the detailed explanation for concept {i} related to {topic}. It is automatically generated since the AI service is offline. (Debug: {debug_info})"
             })
         return {"flashcards": cards}
 
@@ -403,9 +419,15 @@ async def register(user: User, session: Session = Depends(get_session)):
 
 @router.post("/auth/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+    print(f"LOGIN ATTEMPT: {form_data.username}")
     try:
         statement = select(User).where(User.email == form_data.username)
         user = session.exec(statement).first()
+        
+        if not user:
+            print("LOGIN FAILED: User not found")
+        elif not verify_password(form_data.password, user.password_hash):
+            print("LOGIN FAILED: Password mismatch")
         
         if not user or not verify_password(form_data.password, user.password_hash):
             raise HTTPException(
@@ -415,8 +437,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Sessi
             )
         
         access_token = create_access_token(data={"sub": user.email})
+        print("LOGIN SUCCESS")
         return {"access_token": access_token, "token_type": "bearer"}
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"LOGIN ERROR: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 # --- Chat Endpoints ---
@@ -525,8 +553,16 @@ async def query_agent(
             "final_response": {}
         }
         
-        result = await app_graph.ainvoke(inputs)
-        final_response_dict = result.get("final_response", {})
+        try:
+            result = await app_graph.ainvoke(inputs)
+            final_response_dict = result.get("final_response", {})
+        except Exception as e:
+            print(f"Agent Execution Failed: {e}")
+            final_response_dict = {
+                "message_content": "I apologize, but I encountered an error while processing your request. Please try again in a moment.",
+                "cited_sources": [],
+                "action_items": []
+            }
     else:
         # Fallback response when agent is not available
         final_response_dict = {
@@ -1010,3 +1046,303 @@ async def list_marketplace_item(
     session.commit()
     session.refresh(item)
     return item
+
+# --- Holds & Financial Alerts Endpoints ---
+
+@router.get("/holds", response_model=List[StudentHold])
+async def get_my_holds(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Get all holds, alerts, and tasks for the current user."""
+    statement = select(StudentHold).where(StudentHold.user_id == current_user.id).order_by(StudentHold.status.asc(), StudentHold.created_at.desc())
+    return session.exec(statement).all()
+
+@router.post("/holds", response_model=StudentHold)
+async def create_hold(
+    hold: StudentHold,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Create a new hold (Admin Only)."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin permissions required")
+    session.add(hold)
+    session.commit()
+    session.refresh(hold)
+    return hold
+
+@router.put("/holds/{hold_id}/resolve")
+async def resolve_hold(
+    hold_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Resolve a hold (Simulated for demo)."""
+    hold = session.get(StudentHold, hold_id)
+    if not hold or hold.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Hold not found")
+    
+    hold.status = "resolved" if hold.item_type != "task" else "completed"
+    session.add(hold)
+    session.commit()
+    return {"status": "success", "message": f"Hold '{hold.title}' has been marked as {hold.status}."}
+
+# --- Scholarship Endpoints ---
+
+from app.models import Scholarship, PersonalizedStatement
+
+@router.get("/scholarships", response_model=List[Scholarship])
+async def get_scholarships(session: Session = Depends(get_session)):
+    statement = select(Scholarship)
+    return session.exec(statement).all()
+
+@router.post("/ai/scholarships/match")
+async def match_scholarships(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Matches scholarships to the user profile using AI"""
+    scholarships = session.exec(select(Scholarship)).all()
+    
+    # 1. Gemini Matching
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if api_key:
+        try:
+            import google.generativeai as genai
+            import json
+            
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-flash-latest')
+            
+            # Prepare profile context
+            profile = f"""
+            User Name: {current_user.full_name}
+            GPA: {current_user.gpa}
+            Major: {current_user.major}
+            Background: {current_user.background}
+            Interests: {current_user.interests}
+            """
+            
+            # Prepare scholarship list (titles/requirements only to save tokens)
+            scholarship_list = []
+            for s in scholarships:
+                scholarship_list.append({
+                    "id": s.id,
+                    "title": s.title,
+                    "requirements": s.requirements
+                })
+            
+            prompt = f"""
+            As an expert academic advisor, match this student to the top 2 scholarships from the list provided.
+            
+            Student Profile:
+            {profile}
+            
+            Scholarships:
+            {json.dumps(scholarship_list)}
+            
+            Return a JSON array of objects. Each object MUST have:
+            - scholarship_id: (integer id from the list)
+            - match_score: (1-100)
+            - reasoning: (1-2 sentences explaining why it's a good fit)
+            """
+            
+            response = model.generate_content(
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            
+            matches = json.loads(response.text)
+            
+            # Enrich matches with full scholarship details
+            result = []
+            for m in matches:
+                s = session.get(Scholarship, m["scholarship_id"])
+                if s:
+                    result.append({
+                        "scholarship": s,
+                        "score": m["match_score"],
+                        "reasoning": m["reasoning"]
+                    })
+            
+            return result
+        except Exception as e:
+            print(f"Scholarship Matching Failed: {e}")
+
+    # Fallback / Mock logic
+    # Just return top 2 based on GPA if STEM or Merit
+    result = []
+    for s in scholarships[:2]:
+        result.append({
+            "scholarship": s,
+            "score": 85,
+            "reasoning": "Based on your strong academic record and interests in your field."
+        })
+    return result
+
+class DraftRequest(BaseModel):
+    scholarship_id: int
+
+@router.post("/ai/scholarships/draft")
+async def draft_statement(
+    request: DraftRequest,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Drafts a personalized statement for a scholarship"""
+    scholarship = session.get(Scholarship, request.scholarship_id)
+    if not scholarship:
+        raise HTTPException(status_code=404, detail="Scholarship not found")
+        
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if api_key:
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-flash-latest')
+            
+            prompt = f"""
+            Write a highly professional and persuasive 300-word personal statement for the '{scholarship.title}' scholarship.
+            
+            Student Profile:
+            Name: {current_user.full_name}
+            Major: {current_user.major}
+            Background: {current_user.background}
+            GPA: {current_user.gpa}
+            
+            Scholarship Details:
+            Provider: {scholarship.provider}
+            Requirements: {scholarship.requirements}
+            Description: {scholarship.description}
+            
+            Use a formal academic tone. Highlight the student's unique strengths and how they align with the scholarship's goals.
+            """
+            
+            response = model.generate_content(prompt)
+            draft = response.text
+            
+            # Save the draft
+            stmt = PersonalizedStatement(
+                user_id=current_user.id,
+                scholarship_id=scholarship.id,
+                draft_content=draft
+            )
+            session.add(stmt)
+            session.commit()
+            
+            return {"draft": draft}
+        except Exception as e:
+            print(f"Statement Drafting Failed: {e}")
+            
+    return {"draft": f"Failed to generate draft for {scholarship.title}. Please check back later."}
+
+
+# --- Career Pathfinder Endpoints ---
+
+class CareerGoalRequest(BaseModel):
+    target_role: str
+
+@router.post("/career/generate-resume")
+async def generate_resume(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Generates a professional resume based on user profile and courses."""
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        # Mock Response
+        return {"resume": f"# {current_user.email}\n\n## Education\n- Major: {current_user.major}\n- GPA: {current_user.gpa}\n\n## Skills\n(AI Generation Unavailable - Missing Key)"}
+
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-flash-latest')
+        
+        # Fetch courses for context
+        courses = session.exec(select(Course).where(Course.user_id == current_user.id)).all()
+        course_list = ", ".join([f"{c.name} ({c.grade})" for c in courses])
+        
+        prompt = f"""
+        Create a professional resume in Markdown format for a university student.
+        
+        Student Profile:
+        Name: {current_user.full_name or 'Student Name'}
+        Email: {current_user.email}
+        Major: {current_user.major}
+        GPA: {current_user.gpa}
+        Interests: {current_user.interests}
+        Background: {current_user.background}
+        
+        Academic Coursework:
+        {course_list}
+        
+        Instructions:
+        1. Structure it standardly: Header, Education, Skills, Coursework Highlights, Projects (invent 2 plausible academic projects based on the Major).
+        2. Use professional tone.
+        3. Highlight transferable skills from the coursework.
+        """
+        
+        response = model.generate_content(prompt)
+        return {"resume": response.text}
+    except Exception as e:
+        return {"error": str(e), "resume": "## Error Generating Resume\nCould not contact AI service."}
+
+@router.get("/career/jobs")
+async def match_jobs(
+    current_user: User = Depends(get_current_user)
+):
+    """Finds mock internship matches centered on the user's major."""
+    # In a real app, this would use an API or RAG. Here we mock or use AI to hallucinate realistic ones.
+    major = current_user.major or "General"
+    
+    # We will simply pretend to find jobs.
+    return {
+        "jobs": [
+            {"id": 1, "title": f"Junior {major} Intern", "company": "TechGlobal Inc.", "match_score": 95, "location": "Remote"},
+            {"id": 2, "title": "Research Assistant", "company": "University Labs", "match_score": 88, "location": "On Campus"},
+            {"id": 3, "title": f"{major} Analyst", "company": "Future Corp", "match_score": 82, "location": "New York, NY"},
+            {"id": 4, "title": "Project Coordinator", "company": "StartUp Hub", "match_score": 75, "location": "Austin, TX"},
+        ]
+    }
+
+@router.post("/career/skill-gap")
+async def analyze_skill_gap(
+    request: CareerGoalRequest,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Analyzes gap between current skills and target role."""
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return {"analysis": "AI Service Unavailable. Please configure API Key.", "missing_skills": ["Unknown"], "recommended_courses": ["Unknown"]}
+
+    try:
+        import google.generativeai as genai
+        import json
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-flash-latest')
+        
+        courses = session.exec(select(Course).where(Course.user_id == current_user.id)).all()
+        course_names = [c.name for c in courses]
+        
+        prompt = f"""
+        Act as a Career Counselor.
+        Target Role: {request.target_role}
+        Student Major: {current_user.major}
+        Completed Courses: {', '.join(course_names)}
+        
+        Output a valid JSON object with:
+        1. "acquired_skills": List of skills the student likely learned from their courses.
+        2. "missing_skills": List of critical skills needed for the target role that are missing.
+        3. "recommended_actions": List of 3 specific actions (e.g. "Take a specific course", "Build a project using X").
+        """
+        
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        data = json.loads(response.text)
+        return data
+    except Exception as e:
+        return {"error": str(e), "acquired_skills": [], "missing_skills": ["Error analyzing"], "recommended_actions": []}

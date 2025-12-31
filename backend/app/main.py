@@ -23,7 +23,8 @@ def on_startup():
     from sqlmodel import SQLModel, Session, select
     from sqlalchemy import text, inspect
     from app.auth import engine
-    from app.models import Tutor
+    from app.models import Tutor, User, StudentHold
+    from datetime import datetime
     
     try:
         SQLModel.metadata.create_all(engine)
@@ -36,7 +37,11 @@ def on_startup():
             columns_to_add = [
                 ("full_name", "VARCHAR"),
                 ("gpa", "FLOAT"),
-                ("on_track_score", "INTEGER")
+                ("on_track_score", "INTEGER"),
+                ("major", "VARCHAR"),
+                ("background", "VARCHAR"),
+                ("interests", "VARCHAR"),
+                ("is_faculty", "BOOLEAN")
             ]
             for col_name, col_type in columns_to_add:
                 if col_name not in existing_columns:
@@ -67,6 +72,92 @@ def on_startup():
                 if not existing:
                     session.add(t)
             session.commit()
+
+            from app.models import Scholarship
+            from datetime import timedelta
+            
+            sample_scholarships = [
+                Scholarship(
+                    title="STEM Excellence Award",
+                    description="Awarded to outstanding students in Computer Science and Engineering.",
+                    amount=5000.0,
+                    deadline=datetime.now() + timedelta(days=60),
+                    requirements="GPA 3.5+, STEM Major, Leadership experience",
+                    category="STEM",
+                    provider="Technology Foundation"
+                ),
+                Scholarship(
+                    title="Future Leaders Scholarship",
+                    description="Supporting the next generation of community leaders.",
+                    amount=2500.0,
+                    deadline=datetime.now() + timedelta(days=90),
+                    requirements="Community service, Open to all majors, GPA 3.0+",
+                    category="Merit",
+                    provider="Civic League"
+                ),
+                Scholarship(
+                    title="Diversity in Tech Grant",
+                    description="Increasing representation in the technology sector.",
+                    amount=3000.0,
+                    deadline=datetime.now() + timedelta(days=45),
+                    requirements="Underrepresented background, Interest in technology, Major in Tech/Business",
+                    category="Diversity",
+                    provider="Inclusive Partners"
+                ),
+                Scholarship(
+                    title="The Arts & Humanities Fund",
+                    description="Celebrating creative excellence and cultural research.",
+                    amount=1500.0,
+                    deadline=datetime.now() + timedelta(days=120),
+                    requirements="Major in Arts or Humanities, Portfolio required",
+                    category="Merit",
+                    provider="Arts Council"
+                )
+            ]
+            
+            for s in sample_scholarships:
+                statement = select(Scholarship).where(Scholarship.title == s.title)
+                existing = session.exec(statement).first()
+                if not existing:
+                    session.add(s)
+            
+            session.commit()
+            
+            # Seed sample holds for first user
+
+            first_user = session.exec(select(User)).first()
+            if first_user:
+                existing_holds = session.exec(select(StudentHold).where(StudentHold.user_id == first_user.id)).first()
+                if not existing_holds:
+                    sample_holds = [
+                        StudentHold(
+                            user_id=first_user.id,
+                            item_type="hold",
+                            category="Financial",
+                            title="Outstanding Parking Ticket",
+                            description="Unpaid ticket from 12/01/2025. Please pay to avoid registration delays.",
+                            amount=50.00
+                        ),
+                        StudentHold(
+                            user_id=first_user.id,
+                            item_type="task",
+                            category="Financial",
+                            title="Submit FAFSA 2026-2027",
+                            description="The priority deadline for financial aid is approaching. Please submit your FAFSA application.",
+                            due_date=datetime(2026, 3, 1)
+                        ),
+                        StudentHold(
+                            user_id=first_user.id,
+                            item_type="alert",
+                            category="Academic",
+                            title="Missing Final High School Transcript",
+                            description="Your final high school transcript has not been received. Please contact your counselor."
+                        )
+                    ]
+                    for h in sample_holds:
+                        session.add(h)
+                    session.commit()
+                    
             print("Database initialization complete")
     except Exception as e:
         print(f"Startup error: {e}")

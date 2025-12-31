@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import logoAsset from '../assets/logo.png';
+
 
 import './Login.css';
 
@@ -87,8 +89,9 @@ const Login = () => {
                         margin: '0 auto 1.5rem auto',
                         boxShadow: '0 4px 20px rgba(83, 91, 242, 0.4)'
                     }}>
-                        <img src="/icon.svg" alt="Logo" style={{ width: '40px', height: '40px' }} />
+                        <img src={logoAsset} alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px' }} />
                     </div>
+
                     <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: '0', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                         {isRegistering ? 'Create your account' : 'Sign in'}
                     </h1>

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Calendar, Check, X, FileText, Loader2, ScanLine } from 'lucide-react';
+import { Upload, Calendar, Check, X, Loader2, ScanLine } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api';
 
@@ -61,9 +62,10 @@ const SyllabusScanner = () => {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                     setEvents(res.data.events);
-                } catch (err) {
+                } catch (_err) {
                     // Fallback mock if API fails
                     console.warn("API failed, using mock data");
+
                     setEvents([
                         { "title": "Midterm Exam", "date": "2025-10-15", "type": "exam" },
                         { "title": "Chapter 5 Essay", "date": "2025-10-22", "type": "assignment" },

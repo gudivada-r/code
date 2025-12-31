@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { BookOpen, Plus, Trash2, TrendingUp, Award, RefreshCw, Layers, Settings } from 'lucide-react';
+import { BookOpen, Plus, Trash2, TrendingUp, Award, RefreshCw, Settings } from 'lucide-react';
+
 import { motion } from 'framer-motion';
 
 const gradePoints = {
@@ -50,9 +51,10 @@ const Courses = () => {
         try {
             const res = await api.get('/api/users/me');
             setUserData(res.data);
-        } catch (error) {
+        } catch (_err) {
             console.error("Failed to fetch user");
         }
+
     };
 
     const handleAdd = async (e) => {
@@ -63,9 +65,10 @@ const Courses = () => {
             setIsAdding(false);
             fetchCourses();
             fetchUser(); // Refresh insight if it changed
-        } catch (error) {
+        } catch (_error) {
             alert("Failed to add course");
         }
+
     };
 
     const handleDelete = async (id) => {
@@ -74,9 +77,10 @@ const Courses = () => {
             await api.delete(`/api/courses/${id}`);
             fetchCourses();
             fetchUser();
-        } catch (error) {
+        } catch (_error) {
             alert("Failed to delete course");
         }
+
     };
 
     const handleSyncLMS = async () => {

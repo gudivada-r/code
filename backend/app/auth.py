@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -6,10 +7,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
 from app.models import User
-# In a real app, use environment variables!
-SECRET_KEY = "supersecretkey" 
+
+# In a production app, use environment variables!
+SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey_change_me_in_production") 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 import bcrypt
 
@@ -56,7 +59,10 @@ from dotenv import load_dotenv
 # Force load .env to ensure DATABASE_URL is available
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///database.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////tmp/database.db")
+
+
+print(f"DEBUG: Using DATABASE_URL={DATABASE_URL.split('://')[0]}://***")
 
 # Handle potential 'postgres://' vs 'postgresql://' scheme for SQLAlchemy
 if DATABASE_URL.startswith("postgres://"):

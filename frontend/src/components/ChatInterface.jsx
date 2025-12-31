@@ -35,8 +35,9 @@ const ChatInterface = ({ mode, initialSessionId = null }) => {
             const formatted = res.data.map(msg => {
                 let content = msg.content;
                 if (msg.sender === 'ai' && typeof content === 'string') {
-                    try { content = JSON.parse(content); } catch (e) { }
+                    try { content = JSON.parse(content); } catch (_e) { /* ignore parse error */ }
                 }
+
                 if (msg.sender === 'ai' && typeof content === 'object') {
                     return { sender: 'ai', ...content };
                 }
@@ -98,9 +99,10 @@ const ChatInterface = ({ mode, initialSessionId = null }) => {
             }
 
             setMessages(prev => [...prev, { sender: 'ai', ...response.data }]);
-        } catch (error) {
-            setMessages(prev => [...prev, { sender: 'ai', message_content: "Error processing your request." }]);
+        } catch (_error) {
+            setMessages(prev => [...prev, { sender: 'ai', message_content: "I'm having trouble connecting to the server. Please check your connection and try again." }]);
         } finally {
+
             setLoading(false);
         }
     };
@@ -109,6 +111,7 @@ const ChatInterface = ({ mode, initialSessionId = null }) => {
         if (activeSessionId) return null;
         if (mode === 'tutor') return { title: "Hello! I am The Tutor.", sub: "I can help you understand course material, review essays, and solve problems." };
         if (mode === 'admin') return { title: "Hello! I am The Admin.", sub: "Ask me about forms, deadlines, financial aid, and registration." };
+        if (mode === 'fafsa') return { title: "Hello! I am your FAFSA Expert.", sub: "I can guide you through the FAFSA application, explain financial terms, and help with tax data questions." };
         if (mode === 'coach') return { title: "Hello! I am The Coach.", sub: "I'm here to support your mental health and well-being." };
         return { title: "Hello! I am Student Success.", sub: "Ask me about your courses, grades, deadlines, or how you're feeling." };
     };
@@ -132,33 +135,42 @@ const ChatInterface = ({ mode, initialSessionId = null }) => {
                         style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}
                     >
                         <div style={{
-                            background: msg.sender === 'user' ? 'var(--primary-color)' : 'var(--card-bg)',
+                            background: msg.sender === 'user' ? '#4f46e5' : '#f1f5f9',
+                            color: msg.sender === 'user' ? '#ffffff' : '#1e293b',
                             padding: '1rem',
-                            borderRadius: '12px',
-                            borderTopRightRadius: msg.sender === 'user' ? '0' : '12px',
-                            borderTopLeftRadius: msg.sender === 'ai' ? '0' : '12px'
+                            borderRadius: '16px',
+                            borderTopRightRadius: msg.sender === 'user' ? '4px' : '16px',
+                            borderTopLeftRadius: msg.sender === 'ai' ? '4px' : '16px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                         }}>
                             {msg.sender === 'user' ? <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div> : (
                                 <div>
-                                    <p>{msg.message_content || msg.content}</p>
+                                    <p style={{ margin: 0, lineHeight: '1.6' }}>{msg.message_content || msg.content}</p>
 
                                     {msg.cited_sources && msg.cited_sources.length > 0 && (
-                                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><BookOpen size={14} /> <strong>Sources:</strong></div>
-                                            <ul>
+                                        <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#e2e8f0', borderRadius: '8px', fontSize: '0.85rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', marginBottom: '0.5rem', color: '#475569' }}>
+                                                <BookOpen size={14} /> Sources
+                                            </div>
+                                            <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#475569' }}>
                                                 {msg.cited_sources.map((source, i) => <li key={i}>{source}</li>)}
                                             </ul>
                                         </div>
                                     )}
 
                                     {msg.action_items && msg.action_items.length > 0 && (
-                                        <div style={{ marginTop: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><CheckSquare size={14} /> <strong>Action Items:</strong></div>
-                                            {msg.action_items.map((item, i) => (
-                                                <div key={i} style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
-                                                    <input type="checkbox" /> <span>{item}</span>
-                                                </div>
-                                            ))}
+                                        <div style={{ marginTop: '1rem', background: '#eff6ff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #dbeafe' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', marginBottom: '0.5rem', color: '#1d4ed8' }}>
+                                                <CheckSquare size={16} /> Action Items
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                {msg.action_items.map((item, i) => (
+                                                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#334155', fontSize: '0.9rem' }}>
+                                                        <input type="checkbox" style={{ marginTop: '4px' }} />
+                                                        <span>{item}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>

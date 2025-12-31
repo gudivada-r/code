@@ -24,8 +24,9 @@ const FlashcardGenerator = () => {
             try {
                 const res = await api.get('/api/courses');
                 setCourses(res.data);
-            } catch (err) {
+            } catch (_err) {
                 console.error("Failed to load courses");
+
                 // Mock for demo if offline
                 setCourses([
                     { id: 1, name: "Biology 101" },
@@ -52,13 +53,12 @@ const FlashcardGenerator = () => {
             setCurrentIndex(0);
             setIsFlipped(false);
         } catch (error) {
-            console.error("Failed to generate flashcards", error);
-            // Dynamic Fallback
+            console.error("Flashcard Generation Error:", error.response?.data || error.message);
             const topic = mode === 'notes' ? (notes.length < 50 ? notes : "Review Notes") : (chapter || "Course Material");
-            const fallbackCards = Array.from({ length: 20 }, (_, i) => ({
+            const fallbackCards = Array.from({ length: 8 }, (_, i) => ({
                 id: i + 1,
                 front: `Key Concept ${i + 1} (${topic})`,
-                back: `This is a dynamically generated definition for concept #${i + 1} related to "${topic}". The AI service is currently unavailable, so this is a placeholder for testing.`
+                back: `This is a fallback card. The AI service may be experiencing a timeout (Vercel hobby limit is 10s) or the API Key is missing. Try shorter notes or wait a moment.`
             }));
 
             setFlashcards(fallbackCards);

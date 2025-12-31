@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { motion } from 'framer-motion';
-import { TrendingUp, Award, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
+import { TrendingUp, Award, AlertCircle, CheckCircle } from 'lucide-react';
+
 
 const Progress = () => {
     const [courses, setCourses] = useState([]);

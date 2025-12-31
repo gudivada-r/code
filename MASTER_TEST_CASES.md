@@ -565,18 +565,52 @@
 
 ---
 
+
+## 21. DEGREE ROADMAP
+### 21.1 Roadmap Interaction
+- [ ] **TC-343:** Navigate to Degree Roadmap
+- [ ] **TC-344:** Verify unassigned requirements are listed
+- [ ] **TC-345:** Verify semester grid is displayed
+- [ ] **TC-346:** Drag course from audit to semester
+- [ ] **TC-347:** Verify course moves and credits update
+- [ ] **TC-348:** Click "AI Auto-Plan" button
+- [ ] **TC-349:** Verify roadmap populates with suggested courses
+- [ ] **TC-350:** Export roadmap as PDF (if interactive)
+
+## 22. FACULTY PORTAL (SIGNALS)
+### 22.1 Signal Creation
+- [ ] **TC-351:** Login as Faculty
+- [ ] **TC-352:** Navigate to Risk Analytics
+- [ ] **TC-353:** Click "Raise Signal" on a student
+- [ ] **TC-354:** Select "Attendance" issue
+- [ ] **TC-355:** Click "AI Auto-Draft"
+- [ ] **TC-356:** Verify supportive email is generated
+- [ ] **TC-357:** Send signal
+- [ ] **TC-358:** Verify success message
+
+## 23. ADMIN SMART OUTREACH
+### 23.1 Campaign Management
+- [ ] **TC-359:** Login as Admin
+- [ ] **TC-360:** Navigate to Smart Outreach tab
+- [ ] **TC-361:** Filter cohort by GPA < 2.5
+- [ ] **TC-362:** Verify student count updates
+- [ ] **TC-363:** Compose nudge message
+- [ ] **TC-364:** Toggle "AI Agent Handling" on
+- [ ] **TC-365:** Launch campaign
+- [ ] **TC-366:** Verify live dashboard appears
+
 ## TEST EXECUTION SUMMARY
 
-**Total Test Cases:** 342  
+**Total Test Cases:** 366
 **Execution Date:** _____________  
 **Tester Name:** _____________  
 **Environment:** Production / Staging / Local  
 
 ### Results Summary
-- **Total Passed:** _____ / 342
-- **Total Failed:** _____ / 342
-- **Blocked:** _____ / 342
-- **Not Executed:** _____ / 342
+- **Total Passed:** _____ / 366
+- **Total Failed:** _____ / 366
+- **Blocked:** _____ / 366
+- **Not Executed:** _____ / 366
 
 ### Critical Issues Found
 1. _____________________________________________
@@ -598,6 +632,8 @@ _____________________________________________
 - Lecture note saving and retrieval (TC-100 to TC-132)
 - API endpoint tests
 - Data persistence tests
+- Degree Roadmap Drag & Drop (TC-343 to TC-350)
+- Faculty Signal AI Drafting (TC-355)
 
 **Tools Recommended:**
 - **E2E Testing:** Playwright or Cypress
@@ -615,3 +651,4 @@ _____________________________________________
 
 **Version History:**
 - v1.0 (Dec 29, 2025) - Initial master test case list
+- v1.1 (Dec 30, 2025) - Added Degree Roadmap, Faculty Signals, Admin Outreach
