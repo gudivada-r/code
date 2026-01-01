@@ -62,7 +62,7 @@ jobs:
       - name: Build and Archive
         run: |
           xcodebuild archive \
-            -workspace frontend/ios/App/App.xcworkspace \
+            -project frontend/ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
             -archivePath App.xcarchive \
