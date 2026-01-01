@@ -38,7 +38,7 @@ jobs:
       - name: Build and Deploy (Fastlane)
         run: |
           gem install fastlane
-          bundle exec fastlane ios release
+          fastlane release
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
