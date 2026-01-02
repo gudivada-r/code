@@ -148,8 +148,8 @@ const Login = () => {
                             className="login-input"
                         />
                     </div>
-                    <button type="submit" className="login-btn">
-                        {isRegistering ? 'Get Started' : 'Sign In'}
+                    <button type="submit" disabled={loading} className="login-button">
+                        {loading ? "Processing..." : (isRegistering ? "Create Account" : "Sign In (v2.0)")}
                     </button>
                 </form>
                 <div style={{ textAlign: 'center', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
