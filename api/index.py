@@ -206,6 +206,8 @@ try:
     
     # Mount the backend routes
     app.include_router(router, prefix="/api")
+    # Backup mount in case Vercel/FastAPI path stripping logic is misbehaving
+    app.include_router(router, prefix="")
     
     BACKEND_LOADED = True
     print("✓ Successfully loaded backend")
