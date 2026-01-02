@@ -17,6 +17,11 @@ class User(SQLModel, table=True):
     is_faculty: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
+    # Subscription fields
+    trial_ends_at: Optional[datetime] = Field(default=None)
+    subscription_status: str = Field(default="trialing") # trialing, active, canceled, expired
+    stripe_customer_id: Optional[str] = Field(default=None)
+    stripe_subscription_id: Optional[str] = Field(default=None)
     
     chat_sessions: List["ChatSession"] = Relationship(back_populates="user")
     courses: List["Course"] = Relationship(back_populates="user")

@@ -25,6 +25,7 @@ import Footer from './Footer';
 import FacultyDashboard from './FacultyDashboard';
 import DegreeRoadmap from './DegreeRoadmap';
 import Support from './Support';
+import Subscription from './Subscription';
 
 
 import {
@@ -112,6 +113,7 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                     <div className={`nav-item ${activeTab === 'financial' ? 'active' : ''}`} onClick={() => handleProtectedTab('financial')}><GraduationCap size={20} /> Financial Nexus</div>
                     <div className={`nav-item ${activeTab === 'career' ? 'active' : ''}`} onClick={() => handleProtectedTab('career')}><Briefcase size={20} /> Career Pathfinder</div>
                     <div className={`nav-item ${activeTab === 'holds' ? 'active' : ''}`} onClick={() => handleProtectedTab('holds')}><ShieldAlert size={20} /> Holds & Alerts</div>
+                    <div className={`nav-item ${activeTab === 'subscription' ? 'active' : ''}`} onClick={() => handleProtectedTab('subscription')}><CreditCard size={20} /> Subscription</div>
 
                     <div className="section-title">Campus Life</div>
                     <div className={`nav-item ${activeTab === 'social' ? 'active' : ''}`} onClick={() => handleProtectedTab('social')}><Users size={20} /> Social Campus</div>
@@ -217,6 +219,12 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                         <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>On-track score</div>
                     </div>
                 </div>
+
+                {userData?.subscription_info?.status === 'trialing' && (
+                    <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', color: 'white', fontWeight: '600', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                        Free Trial: {userData.subscription_info.days_left} days left
+                    </div>
+                )}
             </motion.div>
 
             {/* Quick Actions */}
@@ -450,6 +458,18 @@ const Dashboard = () => {
         fetchUser();
         // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchHolds();
+
+        const query = new URLSearchParams(window.location.search);
+        if (query.get('payment') === 'success') {
+            // In a real app, use a nicer toast
+            setActiveTab('subscription');
+        }
+
+        const handleSubRequired = () => {
+            setActiveTab('subscription');
+        };
+        window.addEventListener('subscription-required', handleSubRequired);
+        return () => window.removeEventListener('subscription-required', handleSubRequired);
     }, []);
 
 
@@ -587,6 +607,7 @@ const Dashboard = () => {
                     {/* Main Features */}
                     {activeTab === 'degree-roadmap' && <DegreeRoadmap />}
                     {activeTab === 'support' && <Support onBack={() => setActiveTab('dashboard')} />}
+                    {activeTab === 'subscription' && <Subscription userData={userData} onBack={() => setActiveTab('dashboard')} />}
                     {activeTab === 'adminPanel' && userData?.is_admin && <AdminPanel />}
 
                     {activeTab !== 'chat' && <Footer onNavigate={(tab) => setActiveTab(tab)} />}

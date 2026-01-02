@@ -41,7 +41,11 @@ def on_startup():
                 ("major", "VARCHAR"),
                 ("background", "VARCHAR"),
                 ("interests", "VARCHAR"),
-                ("is_faculty", "BOOLEAN")
+                ("is_faculty", "BOOLEAN"),
+                ("trial_ends_at", "TIMESTAMP"),
+                ("subscription_status", "VARCHAR"),
+                ("stripe_customer_id", "VARCHAR"),
+                ("stripe_subscription_id", "VARCHAR")
             ]
             for col_name, col_type in columns_to_add:
                 if col_name not in existing_columns:

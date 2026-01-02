@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 from typing import List, Optional, Dict
 import os
+import stripe
 from pydantic import BaseModel
 
 from app.auth import get_session, create_access_token, get_password_hash, verify_password, get_current_user
@@ -20,6 +21,81 @@ except ImportError:
     print("WARNING: AI Navigator agent not available (langgraph not installed)")
 
 router = APIRouter()
+
+# Stripe Configuration
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+class CheckoutRequest(BaseModel):
+    price_id: str
+
+@router.post("/payments/create-checkout-session")
+async def create_checkout_session(
+    request: CheckoutRequest,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    try:
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            customer_email=current_user.email,
+            line_items=[
+                {
+                    'price': request.price_id,
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription',
+            success_url=f"{frontend_url}/dashboard?payment=success",
+            cancel_url=f"{frontend_url}/dashboard?payment=cancel",
+            metadata={
+                'user_id': current_user.id
+            }
+        )
+        return {"id": checkout_session.id, "url": checkout_session.url}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/payments/webhook")
+async def stripe_webhook(request: Request, session: Session = Depends(get_session)):
+    payload = await request.body()
+    sig_header = request.headers.get('stripe-signature')
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+    
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        raise HTTPException(status_code=400, detail=f"Webhook Error: {str(e)}")
+
+    if event['type'] == 'checkout.session.completed':
+        session_data = event['data']['object']
+        user_id = session_data['metadata'].get('user_id')
+        if user_id:
+            statement = select(User).where(User.id == int(user_id))
+            user = session.exec(statement).first()
+            if user:
+                user.subscription_status = "active"
+                user.stripe_customer_id = session_data.get('customer')
+                user.stripe_subscription_id = session_data.get('subscription')
+                session.add(user)
+                session.commit()
+    
+    return {"status": "success"}
+    
+async def verify_subscription(current_user: User = Depends(get_current_user)):
+    if current_user.subscription_status == "active":
+        return True
+    if current_user.subscription_status == "trialing":
+        if current_user.trial_ends_at and current_user.trial_ends_at > datetime.utcnow():
+            return True
+    raise HTTPException(
+        status_code=status.HTTP_402_PAYMENT_REQUIRED, 
+        detail="Subscription required. Your 7-day free trial has expired."
+    )
+
 
 class SyllabusEvent(BaseModel):
     title: str
@@ -43,7 +119,11 @@ async def parse_syllabus(file: bytes = File(...)):
 
 
 @router.post("/ai/transcribe")
-async def transcribe_audio(file: bytes = File(...), language: str = Form("English")):
+async def transcribe_audio(
+    file: bytes = File(...), 
+    language: str = Form("English"),
+    subscribed: bool = Depends(verify_subscription)
+):
     # Check for API Key
     api_key = os.environ.get("GOOGLE_API_KEY")
     print(f"DEBUG: Checking API KEY. Present? {bool(api_key)}")
@@ -283,7 +363,11 @@ class FlashcardRequest(BaseModel):
     topic: Optional[str] = None
 
 @router.post("/ai/flashcards")
-async def generate_flashcards(request: FlashcardRequest, current_user: User = Depends(get_current_user)):
+async def generate_flashcards(
+    request: FlashcardRequest, 
+    current_user: User = Depends(get_current_user),
+    subscribed: bool = Depends(verify_subscription)
+):
     # Determine if this is a "Topic" request or "Content" request
     is_topic_request = False
     topic_query = ""
@@ -408,6 +492,11 @@ async def register(user: User, session: Session = Depends(get_session)):
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
         
+        # Set trial period (7 days)
+        from datetime import timedelta
+        user.trial_ends_at = datetime.utcnow() + timedelta(days=7)
+        user.subscription_status = "trialing"
+        
         user.password_hash = get_password_hash(user.password_hash)
         session.add(user)
         session.commit()
@@ -490,7 +579,8 @@ async def upload_document(
 async def query_agent(
     request: ChatRequest, 
     current_user: User = Depends(get_current_user),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    subscribed: bool = Depends(verify_subscription)
 ):
     """
     Main endpoint to interact with the AntiGravity Agent.
@@ -673,7 +763,30 @@ async def read_users_me(
         session.commit()
         session.refresh(current_user)
         
-    return current_user
+    # Check if trial has expired
+    is_trial_active = False
+    days_left = 0
+    if current_user.subscription_status == "trialing":
+        if current_user.trial_ends_at:
+            if current_user.trial_ends_at > datetime.utcnow():
+                is_trial_active = True
+                delta = current_user.trial_ends_at - datetime.utcnow()
+                days_left = delta.days
+            else:
+                current_user.subscription_status = "expired"
+                session.add(current_user)
+                session.commit()
+                session.refresh(current_user)
+
+    # Return a flattened response to maintain compatibility
+    user_dict = current_user.dict()
+    user_dict["subscription_info"] = {
+        "status": current_user.subscription_status,
+        "is_trial_active": is_trial_active,
+        "days_left": days_left,
+        "trial_ends_at": current_user.trial_ends_at.isoformat() if current_user.trial_ends_at else None
+    }
+    return user_dict
 
 # --- Scheduling Endpoints ---
 
