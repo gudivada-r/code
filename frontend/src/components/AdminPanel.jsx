@@ -80,21 +80,69 @@ const CampaignsManager = () => {
     const [message, setMessage] = useState('');
     const [aiEnabled, setAiEnabled] = useState(true);
     const [isSending, setIsSending] = useState(false);
+    const [students, setStudents] = useState([]);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+    const [campaigns, setCampaigns] = useState([]);
 
-    // Mock Data
-    const students = [
-        { id: 1, name: "Alex Johnson", gpa: 2.1, risk: "High", phone: "555-0101" },
-        { id: 2, name: "Emily Davis", gpa: 1.9, risk: "High", phone: "555-0102" },
-        { id: 4, name: "Chris Lee", gpa: 2.3, risk: "Medium", phone: "555-0104" },
-    ];
+    useEffect(() => {
+        fetchStudents();
+        fetchCampaigns();
+    }, []);
 
-    const handleSend = () => {
-        setIsSending(true);
-        setTimeout(() => {
-            setIsSending(false);
-            setStep(3);
-        }, 2000);
+    const fetchStudents = async () => {
+        setLoadingStudents(true);
+        try {
+            const res = await api.get('/api/admin/students');
+            setStudents(res.data);
+        } catch (error) {
+            console.error("Failed to fetch students", error);
+        } finally {
+            setLoadingStudents(false);
+        }
     };
+
+    const fetchCampaigns = async () => {
+        try {
+            const res = await api.get('/api/admin/campaigns');
+            setCampaigns(res.data);
+        } catch (error) {
+            console.error("Failed to fetch campaigns", error);
+        }
+    };
+
+    const handleSend = async () => {
+        setIsSending(true);
+        try {
+            const list = students.filter(s => {
+                const gpaMatch = s.gpa <= parseFloat(filters.gpa);
+                const riskMatch = filters.risk === 'Any' || s.risk === filters.risk;
+                return gpaMatch && riskMatch;
+            });
+
+            await api.post('/api/admin/campaigns', {
+                title: `Outreach ${new Date().toLocaleDateString()}`,
+                message: message,
+                filters_json: JSON.stringify(filters),
+                target_count: list.length,
+                status: 'completed'
+            });
+
+            fetchCampaigns();
+            setStep(3);
+        } catch (error) {
+            console.error("Failed to launch campaign", error);
+            alert("Failed to launch campaign");
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const filteredStudentsList = students.filter(s => {
+        const gpaMatch = s.gpa <= parseFloat(filters.gpa);
+        const riskMatch = filters.risk === 'Any' || s.risk === filters.risk;
+        return gpaMatch && riskMatch;
+    });
+
 
     return (
         <div style={{ padding: '0 1rem 1rem 1rem' }}>
@@ -115,33 +163,49 @@ const CampaignsManager = () => {
                     <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '0.5rem' }}>GPA Threshold (Less than)</label>
-                            <select style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', width: '200px' }}>
-                                <option>2.0</option>
-                                <option selected>2.5</option>
-                                <option>3.0</option>
+                            <select
+                                value={filters.gpa}
+                                onChange={(e) => setFilters({ ...filters, gpa: e.target.value })}
+                                style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', width: '200px' }}
+                            >
+                                <option value="2.0">2.0</option>
+                                <option value="2.5">2.5</option>
+                                <option value="3.0">3.0</option>
+                                <option value="4.0">4.0</option>
                             </select>
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '0.5rem' }}>Risk Level</label>
-                            <select style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', width: '200px' }}>
-                                <option>Any</option>
-                                <option>High</option>
-                                <option>Medium</option>
+                            <select
+                                value={filters.risk}
+                                onChange={(e) => setFilters({ ...filters, risk: e.target.value })}
+                                style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', width: '200px' }}
+                            >
+                                <option value="Any">Any</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
                             </select>
                         </div>
                     </div>
 
                     <div style={{ background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                         <div style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', fontWeight: '600', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Target Audience ({students.length} Students)</span>
+                            <span>Target Audience ({filteredStudentsList.length} Students)</span>
                             <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Est. Reach: 100%</span>
                         </div>
-                        {students.map(s => (
-                            <div key={s.id} style={{ padding: '1rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between' }}>
-                                <span>{s.name}</span>
-                                <span style={{ color: '#64748b', fontSize: '0.9rem' }}>GPA: {s.gpa} • {s.risk} Risk</span>
-                            </div>
-                        ))}
+                        {loadingStudents ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading students...</div>
+                        ) : filteredStudentsList.length === 0 ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No students match these filters.</div>
+                        ) : (
+                            filteredStudentsList.map(s => (
+                                <div key={s.id} style={{ padding: '1rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>{s.name}</span>
+                                    <span style={{ color: '#64748b', fontSize: '0.9rem' }}>GPA: {s.gpa} • {s.risk} Risk</span>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     <div style={{ marginTop: '2rem', textAlign: 'right' }}>
@@ -247,10 +311,20 @@ const CampaignsManager = () => {
                     </div>
 
                     <div style={{ background: '#1e293b', borderRadius: '16px', padding: '1.5rem', color: '#f8fafc' }}>
-                        <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}><Bot size={18} /> Live Bot Activity Log</h4>
+                        <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}><Bot size={18} /> Campaign History</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', opacity: 0.8, fontSize: '0.9rem' }}>
-                            <div>Waiting for replies...</div>
-                            {/* Simulation of future activity could go here */}
+                            {campaigns.slice(0, 5).map(c => (
+                                <div key={c.id} style={{ padding: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold' }}>{c.title}</div>
+                                        <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{c.message.substring(0, 40)}...</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div>{c.target_count} Students</div>
+                                        <div style={{ fontSize: '0.75rem' }}>{new Date(c.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

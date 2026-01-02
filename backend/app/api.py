@@ -14,7 +14,7 @@ from app.integrations.lms.canvas import CanvasService
 # Optional imports for AI Navigator (may not be available on Vercel due to size constraints)
 try:
     from app.agent.graph import app_graph
-    from langchain_core.messages import HumanMessage
+    from langchain_core.messages import HumanMessage, AIMessage
     AGENT_AVAILABLE = True
 except ImportError:
     AGENT_AVAILABLE = False
@@ -161,10 +161,20 @@ async def transcribe_audio(
                 
                 prompt = f"""
                 You are an expert academic assistant. The user wants the output in {language}.
-                1. Transcribe the audio file fully.
-                2. Summarize the transcript into 5 key takeaways.
+                1. Transcribe the audio file fully into the "transcript" field.
+                2. Summarize the transcript into 5 key takeaways into the "summary" JSON array.
+                3. Extract any specific tasks, deadlines, or assignments mentioned into an "action_items" JSON array.
+                4. Extract 5-10 technical terms or key concepts into a "keywords" JSON array.
+                5. Suggest 3 thoughtful follow-up questions for the student to ask their professor based on the content into a "follow_up_questions" JSON array.
                 
-                Return valid JSON format: {{ "transcript": "...", "summary": ["point 1", "point 2", ...] }}
+                Return exactly this JSON structure:
+                {{
+                    "transcript": "...",
+                    "summary": ["...", "..."],
+                    "action_items": ["...", "..."],
+                    "keywords": ["...", "..."],
+                    "follow_up_questions": ["...", "..."]
+                }}
                 """
                 
                 # Generate content
@@ -182,7 +192,10 @@ async def transcribe_audio(
 
                 return {
                     "transcript": data.get("transcript", ""),
-                    "summary": data.get("summary", [])
+                    "summary": data.get("summary", []),
+                    "action_items": data.get("action_items", []),
+                    "keywords": data.get("keywords", []),
+                    "follow_up_questions": data.get("follow_up_questions", [])
                 }
             finally:
                 # Clean up local temp file
@@ -214,6 +227,16 @@ async def transcribe_audio(
             "Key Concept: 'Powerhouse of the cell'.",
             "Process: Generates chemical energy.",
             f"Note: Please configure GOOGLE_API_KEY for real {language} translation."
+        ],
+        "action_items": [
+            "Review the diagram of the electron transport chain.",
+            "Complete the quiz on cellular respiration by Friday."
+        ],
+        "keywords": ["ATP", "Aerobic Respiration", "Inner Membrane", "Matrix", "Powerhouse"],
+        "follow_up_questions": [
+            "How does mitochondrial density vary between different types of muscle tissue?",
+            "What happens if the mitochondrial DNA is mutated?",
+            "Can you explain the endosymbiotic theory again in more detail?"
         ]
     }
 
@@ -229,6 +252,9 @@ class LectureNoteSave(BaseModel):
     professor_name: Optional[str] = None
     transcript: str
     summary: List[str]
+    action_items: Optional[List[str]] = None
+    keywords: Optional[List[str]] = None
+    follow_up_questions: Optional[List[str]] = None
     language: str = "English"
     duration_seconds: int = 0
 
@@ -260,6 +286,9 @@ async def save_lecture_note(
         professor_name=note_data.professor_name,
         transcript=note_data.transcript,
         summary=json.dumps(note_data.summary),
+        action_items=json.dumps(note_data.action_items) if note_data.action_items else None,
+        keywords=json.dumps(note_data.keywords) if note_data.keywords else None,
+        follow_up_questions=json.dumps(note_data.follow_up_questions) if note_data.follow_up_questions else None,
         language=note_data.language,
         duration_seconds=note_data.duration_seconds
     )
@@ -290,6 +319,9 @@ async def get_lecture_history(
             "professor_name": note.professor_name,
             "transcript": note.transcript,
             "summary": json.loads(note.summary) if note.summary else [],
+            "action_items": json.loads(note.action_items) if note.action_items else [],
+            "keywords": json.loads(note.keywords) if note.keywords else [],
+            "follow_up_questions": json.loads(note.follow_up_questions) if note.follow_up_questions else [],
             "language": note.language,
             "duration_seconds": note.duration_seconds,
             "is_bookmarked": note.is_bookmarked,
@@ -889,11 +921,9 @@ async def delete_course(
 @router.post("/advisors", response_model=Advisor)
 async def create_advisor(
     advisor: Advisor,
-    current_user: User = Depends(get_current_user),
+    admin: User = Depends(get_admin_user),
     session: Session = Depends(get_session)
 ):
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin permissions required")
     session.add(advisor)
     session.commit()
     session.refresh(advisor)
@@ -902,12 +932,9 @@ async def create_advisor(
 @router.delete("/advisors/{advisor_id}")
 async def delete_advisor(
     advisor_id: int,
-    current_user: User = Depends(get_current_user),
+    admin: User = Depends(get_admin_user),
     session: Session = Depends(get_session)
 ):
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin permissions required")
-    
     advisor = session.get(Advisor, advisor_id)
     if not advisor:
          raise HTTPException(status_code=404, detail="Advisor not found")
@@ -930,11 +957,9 @@ async def get_tutors(
 @router.post("/tutors", response_model=Tutor)
 async def create_tutor(
     tutor: Tutor,
-    current_user: User = Depends(get_current_user),
+    admin: User = Depends(get_admin_user),
     session: Session = Depends(get_session)
 ):
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin permissions required")
     session.add(tutor)
     session.commit()
     session.refresh(tutor)
@@ -943,19 +968,66 @@ async def create_tutor(
 @router.delete("/tutors/{tutor_id}")
 async def delete_tutor(
     tutor_id: int,
-    current_user: User = Depends(get_current_user),
+    admin: User = Depends(get_admin_user),
     session: Session = Depends(get_session)
 ):
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin permissions required")
-    
     tutor = session.get(Tutor, tutor_id)
     if not tutor:
         raise HTTPException(status_code=404, detail="Tutor not found")
-    
     session.delete(tutor)
     session.commit()
     return {"message": "Tutor deleted"}
+
+# --- Admin Outreach & Campaigns ---
+
+from app.models import Campaign
+from app.auth import get_admin_user
+
+@router.get("/admin/students")
+async def get_admin_students(
+    admin: User = Depends(get_admin_user),
+    session: Session = Depends(get_session)
+):
+    """List all students for filtering (Admin Only)"""
+    statement = select(User).where(User.is_admin == False)
+    students = session.exec(statement).all()
+    result = []
+    for s in students:
+        # Simple risk logic for demo
+        risk = "Medium"
+        if s.gpa < 2.3: risk = "High"
+        elif s.gpa > 3.5: risk = "Low"
+        
+        result.append({
+            "id": s.id,
+            "name": s.full_name or s.email,
+            "gpa": s.gpa,
+            "risk": risk,
+            "email": s.email
+        })
+    return result
+
+@router.post("/admin/campaigns")
+async def create_campaign(
+    campaign: Campaign,
+    admin: User = Depends(get_admin_user),
+    session: Session = Depends(get_session)
+):
+    """Launch a new outreach campaign (Admin Only)"""
+    campaign.admin_id = admin.id
+    session.add(campaign)
+    session.commit()
+    session.refresh(campaign)
+    return campaign
+
+@router.get("/admin/campaigns")
+async def get_campaigns(
+    admin: User = Depends(get_admin_user),
+    session: Session = Depends(get_session)
+):
+    """List all campaigns (Admin Only)"""
+    statement = select(Campaign).order_by(Campaign.created_at.desc())
+    return session.exec(statement).all()
 
 # --- Form Endpoints ---
 

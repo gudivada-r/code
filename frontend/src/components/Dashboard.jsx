@@ -236,6 +236,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                     { icon: BookOpen, color: '#10b981', label: 'Tutoring Center', sub: 'Get study help', action: 'tutoring' },
                     { icon: FileText, color: '#f59e0b', label: 'Drop/Add Forms', sub: 'Deadline: Oct 15', action: 'forms' },
                     { icon: Clock, color: '#eab308', label: 'Study Timer', sub: 'Stay focused', action: 'timer' },
+                    { icon: Mic, color: '#4f46e5', label: 'Voice Notes', sub: 'Transcribe lectures', action: 'voice-notes' },
                     { icon: Briefcase, color: '#ec4899', label: 'Career Finder', sub: 'Find internships', action: 'career' },
                 ].map((item, idx) => (
                     <motion.div
@@ -413,6 +414,7 @@ const Dashboard = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [holds, setHolds] = useState([]);
+    const [prefilledData, setPrefilledData] = useState(null);
     const navigate = useNavigate();
 
     const fetchUser = async () => {
@@ -442,7 +444,7 @@ const Dashboard = () => {
         }
     };
 
-    const handleFeatureNavigate = (tab, mode = null, sessionId = null) => {
+    const handleFeatureNavigate = (tab, mode = null, sessionId = null, data = null) => {
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/login');
@@ -450,6 +452,7 @@ const Dashboard = () => {
             setActiveTab(tab);
             setChatMode(mode);
             setChatSessionId(sessionId);
+            setPrefilledData(data);
         }
     };
 
@@ -575,9 +578,9 @@ const Dashboard = () => {
 
                     {activeTab === 'timer' && <StudyTimer onBack={() => setActiveTab('dashboard')} />}
 
-                    {activeTab === 'smart-study' && <FlashcardGenerator />}
+                    {activeTab === 'smart-study' && <FlashcardGenerator prefilledData={prefilledData} />}
 
-                    {activeTab === 'voice-notes' && <LectureVoiceNotes />}
+                    {activeTab === 'voice-notes' && <LectureVoiceNotes onNavigate={handleFeatureNavigate} />}
 
                     {activeTab === 'syllabus' && <SyllabusScanner />}
 

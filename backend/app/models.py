@@ -125,6 +125,9 @@ class LectureNote(SQLModel, table=True):
     professor_name: Optional[str] = None
     transcript: str  # Full transcription
     summary: str  # JSON array of key takeaways
+    action_items: Optional[str] = Field(default=None) # JSON array of tasks
+    keywords: Optional[str] = Field(default=None) # JSON array of terms
+    follow_up_questions: Optional[str] = Field(default=None) # JSON array of questions
     language: str = Field(default="English")
     duration_seconds: int = Field(default=0)
     is_bookmarked: bool = Field(default=False)
@@ -160,4 +163,16 @@ class PersonalizedStatement(SQLModel, table=True):
     scholarship_id: int = Field(foreign_key="scholarship.id")
     draft_content: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Campaign(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    admin_id: int = Field(foreign_key="user.id")
+    title: str
+    message: str
+    filters_json: str # JSON string of filters used
+    target_count: int
+    sent_count: int = Field(default=0)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    status: str = Field(default="active") # active, completed, cancelled
+
 

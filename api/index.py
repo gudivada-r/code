@@ -19,7 +19,11 @@ app.add_middleware(
 try:
     from sqlmodel import SQLModel
     from app.auth import engine
-    from app.models import User, Course # models must be imported!
+    from app.models import (
+        User, Course, ChatSession, ChatMessage, Tutor, FormRequest, 
+        Advisor, StudyGroup, Mentorship, MarketplaceItem, 
+        LectureNote, StudentHold, Scholarship, PersonalizedStatement
+    )
     print("Attempting to create tables...")
     SQLModel.metadata.create_all(engine)
     print("Tables created successfully.")
@@ -70,6 +74,10 @@ def api_root():
         table_status = f"Table creation failed: {e}"
         
     return {"message": "API entry point is live", "db_status": table_status}
+
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy", "backend_loaded": BACKEND_LOADED}
 
 @app.get("/api/debug")
 def debug():

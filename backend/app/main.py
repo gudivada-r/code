@@ -23,7 +23,11 @@ def on_startup():
     from sqlmodel import SQLModel, Session, select
     from sqlalchemy import text, inspect
     from app.auth import engine
-    from app.models import Tutor, User, StudentHold
+    from app.models import (
+        User, Course, ChatSession, ChatMessage, Tutor, FormRequest, 
+        Advisor, StudyGroup, Mentorship, MarketplaceItem, 
+        LectureNote, StudentHold, Scholarship, PersonalizedStatement
+    )
     from datetime import datetime
     
     try:

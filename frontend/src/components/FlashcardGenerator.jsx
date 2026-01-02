@@ -4,9 +4,9 @@ import { RotateCcw, Brain, Sparkles, ChevronLeft, ChevronRight, FileText, BookOp
 import api from '../api';
 import './FlashcardGenerator.css';
 
-const FlashcardGenerator = () => {
+const FlashcardGenerator = ({ prefilledData }) => {
     const [mode, setMode] = useState('notes'); // 'notes' or 'canvas'
-    const [notes, setNotes] = useState('');
+    const [notes, setNotes] = useState(prefilledData?.notes || '');
 
     // Canvas Mode Inputs
     const [courses, setCourses] = useState([]);
@@ -17,6 +17,13 @@ const FlashcardGenerator = () => {
     const [loading, setLoading] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
+
+    useEffect(() => {
+        if (prefilledData?.notes) {
+            setNotes(prefilledData.notes);
+            setMode('notes');
+        }
+    }, [prefilledData]);
 
     useEffect(() => {
         // Fetch courses for dropdown

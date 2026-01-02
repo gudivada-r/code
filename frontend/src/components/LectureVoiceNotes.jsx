@@ -3,7 +3,7 @@ import { Mic, Square, FileAudio, FileText, Check, Loader2, Bookmark, BookmarkChe
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api';
 
-const LectureVoiceNotes = () => {
+const LectureVoiceNotes = ({ onNavigate }) => {
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [audioBlob, setAudioBlob] = useState(null);
@@ -18,6 +18,7 @@ const LectureVoiceNotes = () => {
     const [history, setHistory] = useState([]);
     const [selectedNote, setSelectedNote] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const languages = [
         "English", "Spanish", "Mandarin Chinese", "Hindi", "French",
@@ -128,6 +129,9 @@ const LectureVoiceNotes = () => {
                 professor_name: professorName || null,
                 transcript: result.transcript,
                 summary: result.summary,
+                action_items: result.action_items || [],
+                keywords: result.keywords || [],
+                follow_up_questions: result.follow_up_questions || [],
                 language: targetLanguage,
                 duration_seconds: recordingTime
             });
@@ -181,13 +185,30 @@ const LectureVoiceNotes = () => {
         <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', padding: '1rem', gap: '1rem' }}>
             {/* History Sidebar */}
             <div style={{ width: showHistory ? '350px' : '0', transition: 'width 0.3s', overflow: 'hidden' }}>
-                <div style={{ width: '350px', background: 'white', borderRadius: '12px', padding: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', height: '80vh', overflowY: 'auto' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem' }}>Lecture History</h3>
+                <div style={{ width: '350px', background: 'white', borderRight: '1px solid #e2e8f0', padding: '1.5rem', height: '100%', overflowY: 'auto' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', color: '#1e293b' }}>Lecture History</h3>
+
+                    <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+                        <input
+                            type="text"
+                            placeholder="Search lectures..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem' }}
+                        />
+                        <div style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                        </div>
+                    </div>
+
                     {history.length === 0 ? (
                         <p style={{ color: '#64748b', textAlign: 'center', marginTop: '2rem' }}>No saved lectures yet</p>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {history.map(note => (
+                            {history.filter(note =>
+                                note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                (note.course_name && note.course_name.toLowerCase().includes(searchQuery.toLowerCase()))
+                            ).map(note => (
                                 <div
                                     key={note.id}
                                     onClick={() => setSelectedNote(note)}
@@ -256,28 +277,77 @@ const LectureVoiceNotes = () => {
                     <div style={{ marginBottom: '2rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <h3 style={{ fontSize: '1.3rem', fontWeight: '700' }}>{selectedNote.title}</h3>
-                            <button onClick={() => setSelectedNote(null)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', textDecoration: 'underline' }}>
-                                Close
-                            </button>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                            <div className="card-white" style={{ borderLeft: '4px solid #4f46e5' }}>
-                                <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Check size={20} color="#4f46e5" /> Key Takeaways
-                                </h4>
-                                <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                    {selectedNote.summary.map((point, i) => (
-                                        <li key={i} style={{ color: '#334155', lineHeight: '1.5' }}>{point}</li>
-                                    ))}
-                                </ul>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <button
+                                    onClick={() => onNavigate('smart-study', null, null, { notes: selectedNote.transcript })}
+                                    style={{ padding: '0.5rem 1rem', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}
+                                >
+                                    Generate Flashcards
+                                </button>
+                                <button onClick={() => setSelectedNote(null)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', textDecoration: 'underline' }}>
+                                    Close
+                                </button>
                             </div>
-                            <div className="card-white">
-                                <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <FileText size={20} color="#64748b" /> Full Transcript
-                                </h4>
-                                <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', color: '#475569', lineHeight: '1.6', maxHeight: '300px', overflowY: 'auto' }}>
-                                    {selectedNote.transcript}
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div className="card-white" style={{ borderLeft: '4px solid #4f46e5' }}>
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Check size={20} color="#4f46e5" /> Key Takeaways
+                                    </h4>
+                                    <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {selectedNote.summary.map((point, i) => (
+                                            <li key={i} style={{ color: '#334155', lineHeight: '1.5' }}>{point}</li>
+                                        ))}
+                                    </ul>
                                 </div>
+
+                                {selectedNote.action_items?.length > 0 && (
+                                    <div className="card-white" style={{ borderLeft: '4px solid #ef4444' }}>
+                                        <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <svg width="20" height="20" fill="none" stroke="#ef4444" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20L12 2z" /></svg>
+                                            Action Items
+                                        </h4>
+                                        <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            {selectedNote.action_items.map((item, i) => (
+                                                <li key={i} style={{ color: '#334155' }}>{item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div className="card-white">
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <FileText size={20} color="#64748b" /> Full Transcript
+                                    </h4>
+                                    <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', color: '#475569', lineHeight: '1.6', maxHeight: '250px', overflowY: 'auto', fontSize: '0.95rem' }}>
+                                        {selectedNote.transcript}
+                                    </div>
+                                </div>
+
+                                {selectedNote.keywords?.length > 0 && (
+                                    <div className="card-white">
+                                        <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem' }}>Keywords</h4>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {selectedNote.keywords.map((kw, i) => (
+                                                <span key={i} style={{ padding: '0.4rem 0.8rem', background: '#f1f5f9', borderRadius: '20px', fontSize: '0.85rem', color: '#475569' }}>{kw}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedNote.follow_up_questions?.length > 0 && (
+                                    <div className="card-white" style={{ background: '#f0f9ff', border: '1px solid #bae6fd' }}>
+                                        <h4 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.75rem', color: '#0369a1' }}>Questions for Professor</h4>
+                                        <ul style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            {selectedNote.follow_up_questions.map((q, i) => (
+                                                <li key={i} style={{ color: '#0c4a6e', fontSize: '0.9rem' }}>{q}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -420,35 +490,67 @@ const LectureVoiceNotes = () => {
                                     </div>
                                 )}
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-                                    <div className="card-white" style={{ borderLeft: '4px solid #4f46e5' }}>
-                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Check size={20} color="#4f46e5" /> Key Takeaways
-                                        </h3>
-                                        <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                            {result.summary.map((point, i) => (
-                                                <li key={i} style={{ color: '#334155', lineHeight: '1.5' }}>{point}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-
-                                    <div className="card-white">
-                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <FileText size={20} color="#64748b" /> Full Transcript
-                                        </h3>
-                                        <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', color: '#475569', lineHeight: '1.6', maxHeight: '300px', overflowY: 'auto' }}>
-                                            {result.transcript}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <div className="card-white" style={{ borderLeft: '4px solid #4f46e5' }}>
+                                            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Check size={20} color="#4f46e5" /> Key Takeaways
+                                            </h3>
+                                            <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                                {result.summary.map((point, i) => (
+                                                    <li key={i} style={{ color: '#334155', lineHeight: '1.5' }}>{point}</li>
+                                                ))}
+                                            </ul>
                                         </div>
+
+                                        {result.action_items?.length > 0 && (
+                                            <div className="card-white" style={{ borderLeft: '4px solid #ef4444' }}>
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem' }}>Action Items</h3>
+                                                <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    {result.action_items.map((item, i) => (
+                                                        <li key={i} style={{ color: '#334155' }}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div style={{ textAlign: 'center' }}>
-                                        <button
-                                            onClick={() => { setAudioBlob(null); setResult(null); setRecordingTime(0); setShowSaveDialog(false); }}
-                                            style={{ background: 'transparent', border: 'none', color: '#64748b', textDecoration: 'underline', cursor: 'pointer' }}
-                                        >
-                                            Record New Lecture
-                                        </button>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <div className="card-white">
+                                            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <FileText size={20} color="#64748b" /> Full Transcript
+                                            </h3>
+                                            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', color: '#475569', lineHeight: '1.6', maxHeight: '300px', overflowY: 'auto' }}>
+                                                {result.transcript}
+                                            </div>
+                                        </div>
+
+                                        {result.keywords?.length > 0 && (
+                                            <div className="card-white">
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem' }}>Keywords</h3>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                    {result.keywords.map((kw, i) => (
+                                                        <span key={i} style={{ padding: '0.4rem 0.8rem', background: '#f1f5f9', borderRadius: '20px', fontSize: '0.85rem' }}>{kw}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
+                                </div>
+
+                                <div style={{ textAlign: 'center', marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1.5rem', alignItems: 'center' }}>
+                                    <button
+                                        onClick={() => onNavigate('smart-study', null, null, { notes: result.transcript })}
+                                        style={{ background: '#f59e0b', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '10px', border: 'none', fontWeight: '700', cursor: 'pointer' }}
+                                    >
+                                        Study with Flashcards
+                                    </button>
+                                    <button
+                                        onClick={() => { setAudioBlob(null); setResult(null); setRecordingTime(0); setShowSaveDialog(false); }}
+                                        style={{ background: 'transparent', border: 'none', color: '#64748b', textDecoration: 'underline', cursor: 'pointer' }}
+                                    >
+                                        Record New Lecture
+                                    </button>
                                 </div>
                             </motion.div>
                         )}
