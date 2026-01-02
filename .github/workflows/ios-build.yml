@@ -28,9 +28,12 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
-      - name: Sync Capacitor
+      - name: Freshly Generate iOS Project (Fix Corruption)
         working-directory: ./frontend
-        run: npx cap sync ios
+        run: |
+          rm -rf ios
+          npx cap add ios
+          npx cap sync ios
 
       - name: Strip macOS Detritus
         run: |
