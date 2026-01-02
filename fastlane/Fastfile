@@ -10,14 +10,7 @@ lane :release do
     is_key_content_base64: false
   )
 
-  # 1.1 Ensure App ID exists (Fix for clean accounts)
-  produce(
-    app_identifier: "com.studentsuccess.navigator",
-    app_name: "StudentSuccess",
-    language: "en-US",
-    app_version: "1.0.0",
-    sku: "studentsuccess_nav_001"
-  )
+
 
   # 2. Cleanup Old Certs (Avoid Max Limit)
   puts "Automated Cleanup: Checking for certificates to revoke..."
