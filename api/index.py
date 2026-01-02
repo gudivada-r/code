@@ -128,6 +128,9 @@ try:
     if backend_dir not in sys.path:
         sys.path.insert(0, backend_dir)
     
+    # CRITICAL: Pre-load auth module to ensure get_admin_user is defined before api.py imports it
+    from backend.app import auth as _auth_preload
+    
     from backend.app.main import app as backend_app
     from backend.app.api import router
     
