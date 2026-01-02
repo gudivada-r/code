@@ -68,8 +68,9 @@ lane :release do
     output_directory: "output",
     output_name: "App.ipa",
     clean: true,
+    suppress_xcode_output: false, # Show full log for debugging Exit Code 65
     # derived_data_path: "derived_data", # Let Fastlane handle this
-    xcargs: "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']} PROVISIONING_PROFILE_SPECIFIER=#{ENV['SIGH_UUID']} CODE_SIGN_STYLE=Manual -sdk iphoneos -destination 'generic/platform=iOS' ENABLE_BITCODE=NO",
+    xcargs: "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']} PROVISIONING_PROFILE_SPECIFIER=#{ENV['SIGH_UUID']} CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution' -sdk iphoneos -destination 'generic/platform=iOS' ENABLE_BITCODE=NO",
     export_options: {
       signingStyle: "manual",
       compileBitcode: false,
