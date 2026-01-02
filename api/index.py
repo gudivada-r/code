@@ -52,6 +52,54 @@ try:
                     except Exception as me:
                         print(f"Migration error for {col_name}: {me}")
 
+        # SEED USERS (Test Accounts) - Critical for Vercel
+        try:
+            from app.auth import get_password_hash
+            from sqlmodel import select, Session
+            
+            with Session(engine) as session:
+                # 1. Student
+                if not session.exec(select(User).where(User.email == "student@university.edu")).first():
+                    print("Seeding student@university.edu...")
+                    student = User(
+                        email="student@university.edu",
+                        password_hash=get_password_hash("student123"),
+                        full_name="Alex Student",
+                        gpa=3.8,
+                        on_track_score=92,
+                        is_admin=False
+                    )
+                    session.add(student)
+                
+                # 2. Faculty
+                if not session.exec(select(User).where(User.email == "faculty@university.edu")).first():
+                    print("Seeding faculty@university.edu...")
+                    faculty = User(
+                        email="faculty@university.edu",
+                        password_hash=get_password_hash("faculty123"),
+                        full_name="Dr. Sarah Faculty",
+                        is_admin=False,
+                        is_faculty=True
+                    )
+                    session.add(faculty)
+                    
+                # 3. Admin
+                if not session.exec(select(User).where(User.email == "admin@university.edu")).first():
+                    print("Seeding admin@university.edu...")
+                    admin = User(
+                        email="admin@university.edu",
+                        password_hash=get_password_hash("admin123"),
+                        full_name="System Admin",
+                        is_admin=True
+                    )
+                    session.add(admin)
+                
+                session.commit()
+                print("Seeding complete.")
+        except Exception as seed_err:
+            print(f"Seeding failed: {seed_err}")
+
+
 except Exception as e:
     print(f"Failed to create tables or migrate on import: {e}")
 
