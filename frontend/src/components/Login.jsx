@@ -153,7 +153,7 @@ const Login = () => {
                         />
                     </div>
                     <button type="submit" disabled={loading} className="login-button">
-                        {loading ? "Processing..." : (isRegistering ? "Create Account" : "Sign In (v2.0)")}
+                        {loading ? "Processing..." : (isRegistering ? "Create Account" : "Sign In")}
                     </button>
                 </form>
                 <div style={{ textAlign: 'center', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
