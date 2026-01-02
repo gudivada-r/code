@@ -60,6 +60,9 @@ lane :release do
     team_id: ENV["APPLE_TEAM_ID"]
   )
 
+  # 5.5 Allow codesign to access the keychain without prompt (Crucial for CI)
+  sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k #{keychain_password} #{keychain_path}")
+
   # 6. Build the App
   build_app(
     project: "frontend/ios/App/App.xcodeproj",
