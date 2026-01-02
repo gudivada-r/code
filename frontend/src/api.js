@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+// Configured to work in both local dev and production
 const api = axios.create({
-    baseURL: 'https://studentsuccess-nu.vercel.app',
+    baseURL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://studentsuccess-nu.vercel.app' : 'http://localhost:8000'),
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
