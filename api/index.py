@@ -109,19 +109,19 @@ def test_db():
         from sqlalchemy import text
         with engine.connect() as conn:
             result = conn.execute(text("SELECT 1")).scalar()
-        return {"status": "success", "result": result, "engine_url": str(engine.url).split("://")[0] + "://***"}
-    except Exception as e:
-        import traceback
-        return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
-
-@app.get("/api/test-db")
-def test_db():
-    try:
-        from app.auth import engine
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT 1")).scalar()
-        return {"status": "success", "result": result, "engine_url": str(engine.url).split("://")[0] + "://***"}
+            # Try to get DB Name (works on Postgres)
+            try:
+                db_name = conn.execute(text("SELECT current_database()")).scalar()
+            except:
+                db_name = "Unknown (Not Postgres)"
+                
+        return {
+            "status": "success", 
+            "result": result, 
+            "engine_url": "Postgres (Masked)",
+            "connected_host": str(engine.url.host),
+            "connected_db": str(db_name)
+        }
     except Exception as e:
         import traceback
         return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
