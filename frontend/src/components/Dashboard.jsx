@@ -201,8 +201,8 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
+                <div className="stats-container">
+                    <div className="edit-btn-wrapper">
                         <button
                             onClick={onEditStats}
                             style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}
