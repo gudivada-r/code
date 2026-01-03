@@ -480,7 +480,7 @@ const Dashboard = () => {
         <div style={{ display: 'flex', height: '100vh', height: '100dvh', background: '#f8fafc', flexDirection: 'column' }}>
             {/* Mobile Header - Only visible on small screens */}
             <div className="mobile-only" style={{
-                padding: '1rem',
+                padding: 'calc(1rem + env(safe-area-inset-top)) 1rem 1rem 1rem',
                 background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
