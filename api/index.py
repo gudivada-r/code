@@ -418,4 +418,56 @@ def seed_demo_user_g():
         import traceback
         return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
 
+# --- Texas Higher Education Accountability Module ---
+try:
+    # Try importing from local 'texas_analytics' (relative to this file)
+    try:
+        from texas_analytics import TexasAccountabilityScraper
+    except ImportError:
+        # Fallback for module execution
+        try:
+            from api.texas_analytics import TexasAccountabilityScraper
+        except ImportError:
+            # Last resort: try standard import if in sys.path
+            import texas_analytics as TexasAccountabilityScraper
+
+    texas_scraper = TexasAccountabilityScraper()
+    print("✓ Texas Analytics Module Loaded")
+except Exception as e:
+    texas_scraper = None
+    print(f"Warning: Texas Module could not load: {e}")
+
+@app.get("/api/texas/colleges")
+def get_texas_colleges():
+    """Returns list of Texas Colleges from the scraper."""
+    if not texas_scraper:
+        return {"error": "Texas Module not active"}
+    return texas_scraper.fetch_all_institutions()
+
+from pydantic import BaseModel
+
+class TexasAnalyzeRequest(BaseModel):
+    instId: str
+    sector: str
+    typeId: int
+    name: str
+
+@app.post("/api/texas/analyze")
+def analyze_texas_college(req: TexasAnalyzeRequest):
+    """Fetches metrics and generates Gemini insights for a college."""
+    if not texas_scraper:
+        return {"error": "Texas Module not active"}
+        
+    # 1. Fetch Metrics
+    data = texas_scraper.fetch_college_metrics(req.instId, req.sector, req.typeId)
+    
+    # 2. Analyze
+    insight = texas_scraper.generate_insights(req.name, data)
+    
+    return {
+        "college": req.name,
+        "data_summary": data, 
+        "ai_insight": insight
+    }
+
 
