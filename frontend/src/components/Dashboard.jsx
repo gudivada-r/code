@@ -480,7 +480,7 @@ const Dashboard = () => {
         <div style={{ display: 'flex', height: '100vh', height: '100dvh', background: '#f8fafc', flexDirection: 'column' }}>
             {/* Mobile Header - Only visible on small screens */}
             <div className="mobile-only" style={{
-                padding: 'calc(1rem + env(safe-area-inset-top)) 1rem 1rem 1rem',
+                padding: 'calc(2.5rem + env(safe-area-inset-top)) 1rem 1rem 1rem',
                 background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
@@ -517,6 +517,7 @@ const Dashboard = () => {
                         flex: 1,
                         padding: activeTab === 'chat' ? 0 : '2rem 3rem',
                         overflowY: activeTab === 'chat' ? 'hidden' : 'auto',
+                        overflowX: 'hidden', // Force kill horizontal scroll
                         position: 'relative',
                         display: 'flex',
                         flexDirection: 'column'
