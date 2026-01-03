@@ -533,7 +533,7 @@ const Dashboard = () => {
                         @media (max-width: 768px) {
                             .main-content {
                             padding: ${activeTab === 'chat' ? 0 : '1rem'} !important;
-                        padding-top: calc(5rem + env(safe-area-inset-top)) !important;
+                        padding-top: calc(7rem + env(safe-area-inset-top)) !important;
                             }
 
                         /* Force Stats Grid Side-by-Side */
