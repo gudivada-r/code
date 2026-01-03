@@ -1,15 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
+from models import ActionItem, Metric
 
-# --- CONFIGURATION ---
-APP_TITLE = "Navigator Core"
-VERSION = "1.0.0"
+app = FastAPI(title="Navigator Core", version="1.0.0")
 
-app = FastAPI(title=APP_TITLE, version=VERSION)
-
-# --- CORS ---
+# CORS for Frontend Development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,45 +12,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- GENERIC MODELS ---
-class User(BaseModel):
-    id: int
-    email: str
-    name: str # The "Hero" name
-    role: str # e.g. "Student", "Patient", "Employee"
+# --- Standardized "Signal Engine" Endpoints ---
 
-class ActionItem(BaseModel):
-    id: int
-    title: str # e.g. "Bill Due", "Assignment Missing"
-    severity: str # "critical", "warning", "info"
-    action_url: Optional[str] = None
-
-# --- ROUTES ---
-
-@app.get("/api/health")
-def health_check():
-    return {"status": "operational", "engine": "Navigator Stack v1"}
-
-@app.get("/api/user/me")
-def get_user_profile():
-    # TODO: Connect to DB
-    return User(
-        id=1, 
-        email="demo@example.com", 
-        name="Demo User", 
-        role="Standard User"
-    )
-
-@app.get("/api/signals")
-def get_dashboard_signals():
-    """Returns the 'Holds/Alerts' that drive the Dashboard color"""
+@app.get("/api/signals", response_model=list[ActionItem])
+def get_signals():
+    """
+    Returns a list of 'Signals' (Action Items) for the user.
+    This replaces domain-specific logic like 'get_student_holds'.
+    """
     return [
-        ActionItem(id=1, title="Welcome to your new App", severity="info"),
-        ActionItem(id=2, title="Complete your profile", severity="warning")
+        ActionItem(id="1", title="Review Terms of Service", type="warning", description="Please sign the new agreement."),
+        ActionItem(id="2", title="Welcome Aboard", type="info", description="Setup your profile to get started.")
     ]
 
-# --- VERCEL ENTRY ---
-# This ensures it runs on Serverless correctly
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.get("/api/metrics", response_model=list[Metric])
+def get_metrics():
+    """
+    Returns key performance indicators for the user.
+    """
+    return [
+        Metric(label="Completion", value="85%", trend="up"),
+        Metric(label="Efficiency", value="9.2", trend="neutral")
+    ]
+
+@app.get("/health")
+def health_check():
+    return {"status": "operational", "framework": "Navigator Stack 1.0"}
