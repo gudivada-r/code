@@ -530,10 +530,29 @@ const Dashboard = () => {
                 >
                     {/* Responsive Padding adjustment */}
                     <style>{`
+                    {/* Responsive Styles */}
+                    <style>{`
                         @media (max-width: 768px) {
-                            .main-content { 
-                                padding: ${activeTab === 'chat' ? 0 : '1rem'} !important;
-                                padding-top: calc(5rem + env(safe-area-inset-top)) !important;
+                            .main - content {
+                            padding: ${activeTab === 'chat' ? 0 : '1rem'} !important;
+                        padding-top: calc(5rem + env(safe-area-inset-top)) !important;
+                            }
+
+                        /* Force Stats Grid Side-by-Side */
+                        .stats-container {
+                            display: grid !important;
+                        grid-template-columns: 1fr 1fr !important;
+                        width: 100% !important;
+                        gap: 1rem !important;
+                            }
+                        .edit-btn-wrapper {
+                            grid - column: 1 / -1 !important;
+                        justify-content: center !important;
+                        margin-bottom: 0.5rem !important;
+                            }
+                        .stat-card-glass {
+                            margin - bottom: 0 !important;
+                        width: 100% !important;
                             }
                         }
                     `}</style>
