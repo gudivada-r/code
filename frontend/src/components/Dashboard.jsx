@@ -196,7 +196,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                         {userData?.ai_insight || "Welcome to your Academic Success Navigator. I'm here to help you stay on track with your courses and goals."}
                     </p>
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                        <button onClick={() => onNavigate('chat')} style={{ border: 'none', background: 'white', color: '#4f46e5', padding: '12px 24px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Start a conversation</button>
+                        <button onClick={() => onNavigate('chat')} style={{ border: 'none', background: 'white', color: '#4f46e5', padding: '12px 24px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Chat with AI</button>
                         <button style={{ border: '1px solid rgba(255,255,255,0.3)', background: 'transparent', color: 'white', padding: '12px 24px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>View schedule</button>
                     </div>
                 </div>
