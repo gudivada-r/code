@@ -5,16 +5,14 @@
             "schedule": "0 0 1 * *"
         }
     ],
-    "builds": [
+    "rewrites": [
         {
-            "src": "api/index.py",
-            "use": "@vercel/python"
-        }
-    ],
-    "routes": [
+            "source": "/api/(.*)",
+            "destination": "/api/index.py"
+        },
         {
-            "src": "/(.*)",
-            "dest": "/api/index.py"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
