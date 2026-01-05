@@ -582,24 +582,33 @@ def cron_refresh_texas_data():
 
 @app.get("/api/cip")
 def get_cip_codes(search: Optional[str] = None):
-    with Session(engine) as session:
-        query = select(CIPCode)
-        if search:
-            query = query.where(
-                (CIPCode.title.contains(search)) | 
-                (CIPCode.code.contains(search))
-            )
-        results = session.exec(query.limit(100)).all()
-        return results
+    try:
+        from app.auth import engine
+        from sqlmodel import Session, select
+        with Session(engine) as session:
+            query = select(CIPCode)
+            if search:
+                query = query.where(
+                    (CIPCode.title.contains(search)) | 
+                    (CIPCode.code.contains(search))
+                )
+            results = session.exec(query.limit(100)).all()
+            return results
+    except Exception as e:
+        print(f"Error in get_cip_codes: {e}")
+        return []
 
 @app.post("/api/cip/refresh")
 def refresh_cip_codes_endpoint():
-    with Session(engine) as session:
-        try:
+    try:
+        from app.auth import engine
+        from sqlmodel import Session
+        with Session(engine) as session:
             result = refresh_cip_database(session)
             return result
-        except Exception as e:
-            return {"status": "error", "message": str(e)}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 
 
 
