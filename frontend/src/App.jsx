@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { initializeIAP } from './iap';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -12,18 +12,23 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   useEffect(() => {
-    initializeIAP();
+    // Wrap in try-catch to prevent app crash if plugin is missing
+    try {
+      initializeIAP();
+    } catch (e) {
+      console.error("IAP Init Failed", e);
+    }
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/support" element={<Support onBack={() => window.history.back()} />} />
         <Route path="/" element={<Login />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
