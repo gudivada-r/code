@@ -12,7 +12,7 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   useEffect(() => {
-    // initializeIAP(); // Temporarily disabled to debug black screen
+    initializeIAP();
   }, []);
 
   return (
