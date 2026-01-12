@@ -7,7 +7,6 @@
     "androidScheme": "https",
     "iosScheme": "https",
     "hostname": "app.studentsuccess.local",
-    "url": "https://aumtech.ai",
     "cleartext": false
   },
   "ios": {
