@@ -12,7 +12,17 @@ app = FastAPI(title="Student Success API", version="0.1.0")
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://localhost:5173",
+        "capacitor://localhost",
+        "ionic://localhost",
+        "https://studentsuccess-nu.vercel.app",
+        "https://aumtech.ai",
+        "https://www.aumtech.ai"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

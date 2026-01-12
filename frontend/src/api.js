@@ -14,7 +14,7 @@ const getBaseUrl = () => {
     // PRODUCTION LOGIC
     if (isNative) {
         // Native App must point to remote server
-        return 'https://aumtech.ai';
+        return 'https://studentsuccess-nu.vercel.app';
     } else {
         // Web App (Vercel) uses relative path
         return '';
