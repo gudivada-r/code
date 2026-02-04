@@ -21,7 +21,8 @@ app.add_middleware(
         "ionic://localhost",
         "https://studentsuccess-nu.vercel.app",
         "https://aumtech.ai",
-        "https://www.aumtech.ai"
+        "https://www.aumtech.ai",
+        "https://app.studentsuccess.local"
     ],
     allow_credentials=True,
     allow_methods=["*"],
