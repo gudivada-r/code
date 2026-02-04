@@ -22,7 +22,8 @@ app.add_middleware(
         "https://studentsuccess-nu.vercel.app",
         "https://aumtech.ai",
         "https://www.aumtech.ai",
-        "https://app.studentsuccess.local"
+        "https://app.studentsuccess.local",
+        "capacitor://app.studentsuccess.local"
     ],
     allow_credentials=True,
     allow_methods=["*"],
