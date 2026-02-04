@@ -11,12 +11,16 @@ const getBaseUrl = () => {
     }
 
     // Native App (Capacitor/Ionic/File)
-    // Identify by protocol (capacitor: or file:)
-    if (protocol === 'capacitor:' || protocol === 'file:') {
-        return 'https://studentsuccess-nu.vercel.app';
+    // Check for "capacitor" protocol OR custom hostname defined in capacitor.config.json
+    if (
+        protocol === 'capacitor:' ||
+        protocol === 'file:' ||
+        window.location.hostname === 'app.studentsuccess.local'
+    ) {
+        return 'https://www.aumtech.ai';
     }
 
-    // specific fix for localhost to ensure it hits local backend
+    // specific fix for localhost (development)
     if (origin.includes('localhost')) {
         return 'http://localhost:8000';
     }
