@@ -61,7 +61,13 @@ const Login = () => {
                     alert(`Authentication failed and auto-repair failed!\nError: ${detail}`);
                 }
             } else {
-                alert(`Authentication failed!\nStatus: ${status}\nURL: ${url}\nError: ${detail}`);
+                const fullUrl = (error.config?.baseURL || '') + (error.config?.url || '');
+                alert(`Authentication failed!
+Status: ${status}
+Full URL: ${fullUrl}
+App Origin: ${window.location.origin}
+App Host: ${window.location.hostname}
+Error: ${detail}`);
             }
         } finally {
             setLoading(false);
