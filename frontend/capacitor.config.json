@@ -15,6 +15,9 @@
     "preferredContentMode": "mobile"
   },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "Keyboard": {
       "resize": "body",
       "style": "dark",
