@@ -78,7 +78,7 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                         </div>
 
                         <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, lineHeight: 1.1 }}>Aumtech.ai</h2>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, lineHeight: 1.1 }}>aumtech.ai</h2>
                             <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Student Navigator</span>
                         </div>
                     </div>
@@ -165,7 +165,7 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
 
                         {/* Legal Footer */}
                         <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9', fontSize: '0.65rem', color: '#94a3b8' }}>
-                            <div style={{ marginBottom: '0.25rem' }}>© 2026 Aumtech.ai | Navigator</div>
+                            <div style={{ marginBottom: '0.25rem' }}>© 2026 aumtech.ai | Navigator</div>
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <span onClick={() => handleProtectedTab('privacy')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>Privacy</span>
                                 <span onClick={() => handleProtectedTab('msa')} style={{ cursor: 'pointer', textDecoration: 'none', hover: { textDecoration: 'underline' } }}>MSA</span>
@@ -191,7 +191,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
             >
                 <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem', opacity: 0.9 }}>
-                        <Brain size={18} /> Aumtech.ai Navigator
+                        <Brain size={18} /> aumtech.ai Navigator
                     </div>
                     <h1 style={{ fontSize: '2.5rem', margin: '0.5rem 0 1rem 0', fontWeight: '700' }}>
                         Good afternoon, {userData?.full_name ? userData.full_name.split(' ')[0] : 'Student'}!
@@ -503,7 +503,7 @@ const Dashboard = () => {
                         <img src={logoAsset} alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
                     </div>
 
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', color: '#0f172a' }}>Aumtech.ai Navigator</span>
+                    <span style={{ fontWeight: '700', fontSize: '1.2rem', color: '#0f172a' }}>aumtech.ai Navigator</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1e293b' }}>
                     <Menu size={24} />
