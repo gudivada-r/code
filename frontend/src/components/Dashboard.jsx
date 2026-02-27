@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
-import logoAsset from '../assets/logo.png';
+import logoAsset from '../assets/logo_transparent.png';
 
 
 
@@ -499,7 +499,7 @@ const Dashboard = () => {
                 height: 'auto'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ padding: '0px', borderRadius: '8px' }}>
+                    <div style={{ padding: '4px', borderRadius: '8px', marginRight: '8px' }}>
                         <img src={logoAsset} alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
                     </div>
 

@@ -85,7 +85,7 @@ def test_tutoring_phase2_flow():
         data = res.json()
         print(f"   -> Booking Confirmed: ID {data['appointment_id']}")
         print(f"   -> Start Time: mock 2026-02-15T14:00:00")
-        print(f"   -> Triage: {data['triage_summary']}")
+        print(f"   -> Triage: {data['ai_brief']}")
         
         # 5. Security Test: Book Invalid Course
         print("\n[5/6] Security Test: Trying to book un-enrolled course...")

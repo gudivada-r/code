@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import logoAsset from '../assets/logo.png';
+import logoAsset from '../assets/logo_transparent_white_text.png';
 
 
 import './Login.css';
@@ -119,17 +119,12 @@ Error: ${detail}`);
             >
                 <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                     <div style={{
-                        width: '64px',
-                        height: '64px',
-                        background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                        borderRadius: '16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        margin: '0 auto 1.5rem auto',
-                        boxShadow: '0 4px 20px rgba(83, 91, 242, 0.4)'
+                        margin: '0 auto 1.5rem auto'
                     }}>
-                        <img src={logoAsset} alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px' }} />
+                        <img src={logoAsset} alt="Logo" style={{ width: '150px', filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.3))' }} />
                     </div>
 
                     <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: '0', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
