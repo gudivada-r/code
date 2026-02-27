@@ -71,19 +71,18 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
 
             <div className={`sidebar ${isOpen ? 'open' : ''}`}>
                 {/* Logo & Close Button */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', paddingLeft: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                        <div style={{ padding: '4px', borderRadius: '10px' }}>
-                            <img src={logoAsset} alt="Logo" style={{ width: '42px', height: '42px', borderRadius: '8px' }} />
-                        </div>
-
-                        <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, lineHeight: 1.1 }}>aumtech.ai</h2>
-                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Student Navigator</span>
-                        </div>
+                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2.5rem', paddingTop: '1rem' }}>
+                    <div style={{ padding: '4px', borderRadius: '10px' }}>
+                        <img src={logoAsset} alt="Logo" style={{ width: '120px', height: 'auto', borderRadius: '8px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }} />
                     </div>
+
+                    <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, lineHeight: 1.1 }}>aumtech.ai</h2>
+                        <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Student Navigator</span>
+                    </div>
+
                     {/* Mobile Close Button */}
-                    <button className="mobile-only" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                    <button className="mobile-only" onClick={onClose} style={{ position: 'absolute', right: '0.5rem', top: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
                         <X size={24} />
                     </button>
                 </div>
