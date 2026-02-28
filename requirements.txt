@@ -14,4 +14,6 @@ bcrypt
 google-generativeai>=0.8.3
 stripe
 redis
+google-auth
+
 

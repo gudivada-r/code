@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import logoAsset from '../assets/logo_transparent.png';
 
 
@@ -14,6 +15,22 @@ const Login = () => {
     const [isRegistering, setIsRegistering] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setLoading(true);
+        try {
+            const response = await api.post('/api/auth/google', {
+                credential: credentialResponse.credential
+            });
+            localStorage.setItem('token', response.data.access_token);
+            navigate('/dashboard');
+        } catch (error) {
+            console.error("Google Auth Error:", error);
+            alert("Google Sign-In failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -182,6 +199,26 @@ Error: ${detail}`);
                     <button type="submit" disabled={loading} className="login-button">
                         {loading ? "Processing..." : (isRegistering ? "Create Account" : "Sign In")}
                     </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
+                        <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
+                        <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>OR</span>
+                        <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => {
+                                console.log('Login Failed');
+                                alert("Google Login Failed");
+                            }}
+                            useOneTap
+                            theme="filled_blue"
+                            shape="pill"
+                            width="100%"
+                        />
+                    </div>
                 </form>
                 <div style={{ textAlign: 'center', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
                     <p style={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', transition: 'color 0.2s' }} onClick={() => setIsRegistering(!isRegistering)}>

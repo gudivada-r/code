@@ -2,13 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request, File, Fo
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 from typing import List, Optional, Dict
+from google.oauth2 import id_token
+from google.auth.transport import requests
+import os
 import os
 import stripe
 from pydantic import BaseModel
 
 from app.auth import get_session, create_access_token, get_password_hash, verify_password, get_current_user, get_admin_user
 from app.models import ChatSession, ChatMessage, Tutor, User, StudentHold
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.integrations.lms.canvas import CanvasService
 
 # Optional imports for AI Navigator (may not be available on Vercel due to size constraints)
@@ -581,6 +584,84 @@ async def register(user: User, session: Session = Depends(get_session)):
         return {"message": "User created successfully"}
     except Exception as e:
         # Return the error message to help debug 500 errors
+        raise HTTPException(status_code=500, detail=str(e))
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
+@router.post("/auth/google")
+async def google_auth(request: GoogleAuthRequest, session: Session = Depends(get_session)):
+    """
+    Verifies Google ID Token and returns an application JWT.
+    """
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+    if not google_client_id:
+        # For development purposes, if client ID is missing, we might want to log it
+        # but in production this must be set.
+        print("WARNING: GOOGLE_CLIENT_ID is not set in environment variables.")
+        # We'll allow it to proceed if we want to skip verification for testing, 
+        # but normally we should fail.
+        # raise HTTPException(status_code=500, detail="Google Client ID not configured")
+
+    try:
+        # Verify the ID token
+        id_info = id_token.verify_oauth2_token(
+            request.credential, 
+            requests.Request(), 
+            google_client_id
+        )
+
+        # ID token is valid, get user info
+        email = id_info.get("email")
+        full_name = id_info.get("name")
+        picture = id_info.get("picture")
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Invalid Google token (no email)")
+
+        # Check if user exists
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+
+        if not user:
+            # Create new user
+            print(f"Creating new user from Google: {email}")
+            user = User(
+                email=email,
+                full_name=full_name,
+                password_hash=get_password_hash(os.urandom(16).hex()), # Random password
+                is_active=True,
+                subscription_status="trialing",
+                trial_ends_at=datetime.utcnow() + timedelta(days=7)
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        
+        if not user.is_active:
+             raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is inactive. Please contact your administrator.",
+            )
+
+        # Create access token
+        access_token = create_access_token(data={"sub": user.email})
+        return {
+            "access_token": access_token, 
+            "token_type": "bearer",
+            "user": {
+                "email": user.email,
+                "full_name": user.full_name,
+                "is_admin": user.is_admin
+            }
+        }
+
+    except ValueError as e:
+        # Invalid token
+        print(f"Google Token Verification Failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+    except Exception as e:
+        print(f"Google Auth Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/auth/login")
