@@ -19,9 +19,9 @@ const DegreeRoadmap = () => {
 
     const [plan, setPlan] = useState({
         'Fall 2024': ['cs101', 'math101', 'eng101'],
-        'Spring 2025': [],
-        'Fall 2025': [],
-        'Spring 2026': [],
+        'Spring 2025': ['cs102', 'math102', 'phys101'],
+        'Fall 2025': ['cs201', 'cs202', 'hist101'],
+        'Spring 2026': ['art101'],
         'Fall 2026': [],
         'Spring 2027': [],
     });

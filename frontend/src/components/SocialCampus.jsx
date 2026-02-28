@@ -3,6 +3,25 @@ import { Users, GraduationCap, ShoppingBag, Plus, BookOpen, MapPin, Calendar, Se
 import { motion } from 'framer-motion';
 import api from '../api';
 
+// Demo data so Social Campus never looks empty
+const DEMO_STUDY_GROUPS = [
+    { id: 1, name: 'CS 101 Study Crew', course_code: 'CS 101', topic: 'Python fundamentals, loops, functions & OOP basics', schedule: 'Mon & Wed 5:00 PM', location: 'Library Room 204', members_count: 4, max_members: 6 },
+    { id: 2, name: 'Calculus II Prep', course_code: 'MATH 102', topic: 'Integration by parts, series & convergence tests', schedule: 'Tue & Thu 6:00 PM', location: 'STEM Building 110', members_count: 3, max_members: 5 },
+    { id: 3, name: 'Academic Writing Workshop', course_code: 'ENG 101', topic: 'Essay structure, citations & research methods', schedule: 'Friday 3:00 PM', location: 'Humanities 305', members_count: 5, max_members: 8 },
+    { id: 4, name: 'Finals Week Grind', course_code: 'GENERAL', topic: 'Open study – all subjects welcome', schedule: 'Daily 7:00 PM – 10:00 PM', location: 'Student Center Hub', members_count: 12, max_members: 20 },
+];
+
+const DEMO_MENTORS = [
+    { id: 1, mentor_name: 'Alex Rivera', specialty: 'Computer Science & Python', bio: 'Senior CS student, 2 years of TA experience. Happy to help with algorithms and debugging.', availability: 'Weekends & evenings' },
+    { id: 2, mentor_name: 'Priya Nair', specialty: 'Mathematics & Statistics', bio: 'Math major with Dean\'s List honors. Love breaking down complex calculus concepts.', availability: 'Tue/Thu afternoons' },
+];
+
+const DEMO_MARKET_ITEMS = [
+    { id: 1, title: 'Calculus: Early Transcendentals (8th Ed)', price: 45, condition: 'Good', seller_name: 'Jordan M.', image_url: '' },
+    { id: 2, title: 'Introduction to Algorithms (CLRS)', price: 60, condition: 'Good', seller_name: 'Sam K.', image_url: '' },
+    { id: 3, title: 'The Bedford Handbook (10th Ed)', price: 20, condition: 'Fair', seller_name: 'Taylor R.', image_url: '' },
+];
+
 const SocialCampus = () => {
     const [activeTab, setActiveTab] = useState('study'); // study, mentors, marketplace
     const [loading, setLoading] = useState(false);
@@ -31,16 +50,23 @@ const SocialCampus = () => {
         try {
             if (activeTab === 'study') {
                 const res = await api.get('/api/social/study-groups');
-                setStudyGroups(res.data);
+                const data = res.data;
+                setStudyGroups(data && data.length > 0 ? data : DEMO_STUDY_GROUPS);
             } else if (activeTab === 'mentors') {
                 const res = await api.get('/api/social/mentors');
-                setMentors(res.data);
+                const data = res.data;
+                setMentors(data && data.length > 0 ? data : DEMO_MENTORS);
             } else if (activeTab === 'marketplace') {
                 const res = await api.get('/api/social/marketplace');
-                setMarketItems(res.data);
+                const data = res.data;
+                setMarketItems(data && data.length > 0 ? data : DEMO_MARKET_ITEMS);
             }
         } catch (error) {
             console.error("Failed to load social data", error);
+            // Fall back to demo data so page is never empty
+            if (activeTab === 'study') setStudyGroups(DEMO_STUDY_GROUPS);
+            else if (activeTab === 'mentors') setMentors(DEMO_MENTORS);
+            else if (activeTab === 'marketplace') setMarketItems(DEMO_MARKET_ITEMS);
         } finally {
             setLoading(false);
         }

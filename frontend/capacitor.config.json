@@ -4,6 +4,7 @@
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
+    "url": "https://studentsuccess-nu.vercel.app",
     "androidScheme": "https",
     "iosScheme": "https",
     "hostname": "app.studentsuccess.local",
