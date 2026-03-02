@@ -41,12 +41,12 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/bookmark_logo.png" />
   <link rel="apple-touch-icon" sizes="167x167" href="/bookmark_logo.png" />
 
-  <!-- JSON-LD Structured Data -->
+  <!-- JSON-LD Structured Data for AEO & Rich Snippets -->
   <script type="application/ld+json">
-    {
+    [{
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "Student Success Navigator",
+      "name": "aumtech.ai - Student Success Navigator",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web, iOS, Android",
       "offers": {
@@ -60,7 +60,26 @@
         "logo": "https://aumtech.ai/assets/logo.png"
       },
       "description": "An AI-powered multi-agent system designed to support students with academic, administrative, and wellness queries."
-    }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "How does aumtech.ai track my GPA?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Aumtech.ai acts as your personal AI student navigator by integrating directly with your syllabus to calculate and forecast your GPA in real-time."
+        }
+      }, {
+        "@type": "Question",
+        "name": "What is an AI Student Navigator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It is an intelligent academic planner that uses AI to track courses, plan study schedules, and offer wellness check-ins, serving as an automated college advisor."
+        }
+      }]
+    }]
   </script>
 </head>
 
