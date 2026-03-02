@@ -3,7 +3,7 @@ import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
-import logoAsset from '../assets/logo_transparent.png';
+import logoAsset from '../assets/logo.png';
 
 
 import './Login.css';

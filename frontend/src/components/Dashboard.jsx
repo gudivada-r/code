@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
-import logoAsset from '../assets/logo_transparent.png';
+import logoAsset from '../assets/logo.png';
 
 
 
