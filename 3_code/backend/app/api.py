@@ -594,7 +594,7 @@ async def google_auth(request: GoogleAuthRequest, session: Session = Depends(get
     """
     Verifies Google ID Token and returns an application JWT.
     """
-    google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID")
     if not google_client_id:
         # For development purposes, if client ID is missing, we might want to log it
         # but in production this must be set.
