@@ -72,7 +72,7 @@ async def tutor_agent(state: AgentState):
 
     if api_key:
         # Call Gemini REST API directly — bypasses library version issues
-        models_to_try = ['gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro']
+        models_to_try = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro']
         message = None
         
         prompt_text = f"""You are an expert academic tutor and advisor at a university.
