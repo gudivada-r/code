@@ -16,19 +16,28 @@ def get_supabase_client():
     from app.auth import engine
     from app.models import SystemConfig
     
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
+    url = None
+    key = None
     
-    if not url or not key:
+    # Check Database Config FIRST (Allows UI Override)
+    try:
         with Session(engine) as session:
             url_cfg = session.exec(select(SystemConfig).where(SystemConfig.key_name == 'SUPABASE_URL')).first()
             key_cfg = session.exec(select(SystemConfig).where(SystemConfig.key_name == 'SUPABASE_KEY')).first()
-            if url_cfg and key_cfg:
+            if url_cfg and key_cfg and url_cfg.key_value and key_cfg.key_value:
                 url = url_cfg.key_value
                 key = key_cfg.key_value
+    except Exception as e:
+        print("Error accessing SystemConfig:", e)
+    
+    # Fallback to Environment Variables
+    if not url or not key:
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
                 
     if not url or not key:
         return None
+        
     return create_client(url, key)
 
 class EdNexConfig(BaseModel):
@@ -39,16 +48,24 @@ class EdNexConfig(BaseModel):
 async def get_ednex_config(current_user: User = Depends(get_current_user)):
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail='Not an admin')
-    url = os.environ.get("SUPABASE_URL")
-    if url:
-        return {"configured": True, "source": "env"}
     from app.auth import engine
     from sqlmodel import Session, select
     from app.models import SystemConfig
-    with Session(engine) as session:
-        url_cfg = session.exec(select(SystemConfig).where(SystemConfig.key_name == 'SUPABASE_URL')).first()
-        if url_cfg:
-            return {"configured": True, "source": "db"}
+    
+    # Check Database Config FIRST
+    try:
+        with Session(engine) as session:
+            url_cfg = session.exec(select(SystemConfig).where(SystemConfig.key_name == 'SUPABASE_URL')).first()
+            if url_cfg and url_cfg.key_value:
+                return {"configured": True, "source": "db"}
+    except:
+        pass
+        
+    # Fallback to Env
+    url = os.environ.get("SUPABASE_URL")
+    if url:
+        return {"configured": True, "source": "env"}
+        
     return {"configured": False, "source": "none"}
 
 @ednex_router.post("/config")
