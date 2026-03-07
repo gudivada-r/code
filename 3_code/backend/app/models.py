@@ -208,3 +208,11 @@ class TutoringAppointment(SQLModel, table=True):
     triage_note: Optional[str] = None
     triage_image_url: Optional[str] = None
     ai_summary: Optional[str] = None # Logic analysis of the problem
+
+# --- System Config Models ---
+class SystemConfig(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    key_name: str = Field(unique=True, index=True)
+    key_value: str
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+

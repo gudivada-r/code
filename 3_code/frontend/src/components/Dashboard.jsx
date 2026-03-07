@@ -13,6 +13,7 @@ import DropAddForms from './DropAddForms';
 import Progress from './Progress';
 import History from './History';
 import AdminPanel from './AdminPanel';
+import AdminEdnex from './AdminEdnex';
 import FlashcardGenerator from './FlashcardGenerator';
 import SyllabusScanner from './SyllabusScanner';
 import SocialCampus from './SocialCampus';
@@ -34,7 +35,7 @@ import Subscription from './Subscription';
 import {
     LayoutDashboard, MessageSquare, Calendar, BookOpen,
     TrendingUp, User, Settings, LogOut, Clock,
-    Users, FileText, Heart, GraduationCap, ChevronRight, Edit3, Menu, X, Shield, History as HistoryIcon, Brain, ScanLine, Mic, ShieldAlert, AlertTriangle, Briefcase, Map, CreditCard
+    Users, FileText, Heart, GraduationCap, ChevronRight, Edit3, Menu, X, Shield, History as HistoryIcon, Brain, ScanLine, Mic, ShieldAlert, AlertTriangle, Briefcase, Map, CreditCard, Database
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
@@ -135,6 +136,7 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                         <>
                             <div className="section-title">Admin</div>
                             <div className={`nav-item ${activeTab === 'adminPanel' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminPanel')}><Shield size={20} /> Admin Panel</div>
+                            <div className={`nav-item ${activeTab === 'adminEdnex' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminEdnex')}><Database size={20} /> EdNex Config</div>
                         </>
                     )}
 
@@ -699,6 +701,7 @@ const Dashboard = () => {
                     {activeTab === 'support' && <Support onBack={() => setActiveTab('dashboard')} />}
                     {activeTab === 'subscription' && <Subscription userData={userData} onBack={() => setActiveTab('dashboard')} />}
                     {activeTab === 'adminPanel' && userData?.is_admin && <AdminPanel />}
+                    {activeTab === 'adminEdnex' && userData?.is_admin && <AdminEdnex />}
 
                     {activeTab !== 'chat' && <Footer onNavigate={(tab) => setActiveTab(tab)} />}
                 </main>
