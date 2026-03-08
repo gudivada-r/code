@@ -195,7 +195,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
             >
                 {/* EdNex Verified Badge */}
                 {userData?.is_ednex_verified && (
-                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}>
+                    <div className="ednex-neon" style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', color: 'white' }}>
                         <Shield size={14} /> EdNex Verified
                     </div>
                 )}
@@ -589,8 +589,20 @@ const Dashboard = () => {
                     }}
                     className="main-content"
                 >
-                    {/* Responsive Padding adjustment */}
+                    {/* Responsive Padding adjustment & Neon Effects */}
                     <style>{`
+                        @keyframes neon-glow {
+                            0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), 0 0 10px rgba(16, 185, 129, 0.2); text-shadow: 0 0 2px rgba(255,255,255,0.5); border-color: rgba(16, 185, 129, 0.5); }
+                            50% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 20px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.4); text-shadow: 0 0 5px rgba(255,255,255,1), 0 0 10px #10b981; border-color: #10b981; }
+                            100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), 0 0 10px rgba(16, 185, 129, 0.2); text-shadow: 0 0 2px rgba(255,255,255,0.5); border-color: rgba(16, 185, 129, 0.5); }
+                        }
+                        .ednex-neon {
+                            animation: neon-glow 1.5s infinite;
+                            border: 1px solid #10b981;
+                            background: rgba(16, 185, 129, 0.15);
+                            backdrop-filter: blur(10px);
+                        }
+
                         @media (max-width: 768px) {
                             .main-content {
                             padding: ${activeTab === 'chat' ? 0 : '1rem'} !important;
