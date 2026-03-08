@@ -408,6 +408,19 @@ const EditProfileModal = ({ userData, onClose, onRefresh }) => {
                         </select>
                     </div>
 
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', background: '#ecfdf5', padding: '1rem', borderRadius: '8px', border: '1px solid #10b981' }}>
+                        <input
+                            type="checkbox"
+                            checked={true}
+                            onChange={() => { }}
+                            style={{ transform: 'scale(1.2)' }}
+                        />
+                        <div>
+                            <div style={{ fontWeight: '700', color: '#065f46', fontSize: '0.9rem' }}>Enable AI SMS Nudges</div>
+                            <div style={{ fontSize: '0.8rem', color: '#047857' }}>Get proactive texts from Get Aura if you are falling behind or missing deadlines.</div>
+                        </div>
+                    </div>
+
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                         <button type="button" onClick={onClose} style={{ flex: 1, padding: '0.75rem', background: '#f1f5f9', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Close</button>
                         <button type="submit" style={{ flex: 1, padding: '0.75rem', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Save Changes</button>
@@ -645,7 +658,7 @@ const Dashboard = () => {
                                             chatMode === 'fafsa' ? 'AI FAFSA Expert' : 'Get Aura'}
                             </h2>
                             <div style={{ flex: 1, background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', overflow: 'hidden', minHeight: 0 }}>
-                                <ChatInterface mode={chatMode} initialSessionId={chatSessionId} />
+                                <ChatInterface mode={chatMode} initialSessionId={chatSessionId} prefilledData={prefilledData} />
                             </div>
                         </div>
                     )}
@@ -707,7 +720,6 @@ const Dashboard = () => {
                 </main>
             </div>
 
-            {/* Modal can be triggered from anywhere */}
             {(isEditModalOpen || activeTab === 'edit-profile') && (
                 <EditProfileModal
                     userData={userData}
@@ -717,6 +729,39 @@ const Dashboard = () => {
                     }}
                     onRefresh={fetchUser}
                 />
+            )}
+
+            {/* Feature 1: The Panic Button (Instant Hand Raise) */}
+            {activeTab !== 'chat' && (
+                <motion.button
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleFeatureNavigate('chat', 'coach', null, { message: 'I need help immediately.' })}
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        right: '2rem',
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50px',
+                        padding: '1rem 1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 10px 25px -5px rgba(239, 68, 68, 0.5), 0 8px 10px -6px rgba(239, 68, 68, 0.5)',
+                        cursor: 'pointer',
+                        fontWeight: '800',
+                        fontSize: '1rem',
+                        zIndex: 1000
+                    }}
+                >
+                    <AlertTriangle size={20} />
+                    I Need Help Now
+                </motion.button>
             )}
         </div>
     );

@@ -20,11 +20,29 @@ const CareerPathfinder = () => {
     const [targetRole, setTargetRole] = useState('');
     const [skillAnalysis, setSkillAnalysis] = useState(null);
 
+    // Pathways State
+    const [pathways, setPathways] = useState([]);
+
     useEffect(() => {
         if (activeTab === 'jobs' && jobs.length === 0) {
             fetchJobs();
         }
+        if (activeTab === 'pathways' && pathways.length === 0) {
+            fetchPathways();
+        }
     }, [activeTab]);
+
+    const fetchPathways = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/api/career/pathways');
+            setPathways(res.data.pathways || []);
+        } catch (err) {
+            console.error("Failed to fetch pathways", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchJobs = async () => {
         setLoading(true);
@@ -88,6 +106,7 @@ const CareerPathfinder = () => {
                     { id: 'jobs', label: 'Internship Matcher', icon: Search },
                     { id: 'resume', label: 'AI Resume Builder', icon: FileText },
                     { id: 'skills', label: 'Skill Gap Analysis', icon: Target },
+                    { id: 'pathways', label: 'AI Career Pathways', icon: BarChart2 },
                 ].map((tab) => (
                     <button
                         key={tab.id}
@@ -375,6 +394,64 @@ const CareerPathfinder = () => {
                                     </ul>
                                 </div>
                             </div>
+                        )}
+                    </motion.div>
+                )}
+
+                {activeTab === 'pathways' && (
+                    <motion.div key="pathways" variants={tabVariants} initial="hidden" animate="visible" exit="exit" className="card-white" style={{ padding: '3rem', maxWidth: '850px', margin: '0 auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                            <div style={{ width: '60px', height: '60px', background: '#eef2ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                                <BarChart2 size={32} style={{ color: '#4f46e5' }} />
+                            </div>
+                            <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', color: '#1e293b', fontWeight: '800' }}>AI-Powered Career Mapping</h3>
+                            <p style={{ color: '#64748b', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto' }}>
+                                See step-by-step career pathways built by our AI based on Labor Market Data (O*NET) matched to your current credits.
+                            </p>
+                        </div>
+
+                        {loading && <div style={{ textAlign: 'center', padding: '2rem' }}>Loading Labor Market Data...</div>}
+
+                        {!loading && pathways.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                {pathways.map(path => (
+                                    <div key={path.id} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+                                        <div style={{ padding: '1.5rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                            <div>
+                                                <h4 style={{ margin: 0, fontSize: '1.25rem', color: '#1e293b' }}>{path.role}</h4>
+                                                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.9rem', color: '#64748b' }}>
+                                                    <span>💰 {path.salary_range}</span>
+                                                    <span>📈 Demand: <strong style={{ color: '#10b981' }}>{path.demand}</strong></span>
+                                                </div>
+                                            </div>
+                                            <div style={{ background: '#eef2ff', color: '#4f46e5', padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: '700', fontSize: '0.85rem' }}>
+                                                {path.match}% Match
+                                            </div>
+                                        </div>
+                                        <div style={{ padding: '1.5rem', background: 'white' }}>
+                                            <h5 style={{ margin: '0 0 1rem 0', color: '#334155', fontSize: '1rem' }}>Your Pathway Milestones:</h5>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {path.milestones.map((milestone, idx) => (
+                                                    <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'start' }}>
+                                                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#4f46e5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: '700', flexShrink: 0, marginTop: '2px' }}>
+                                                            {idx + 1}
+                                                        </div>
+                                                        <div style={{ color: '#475569', lineHeight: '1.5' }}>
+                                                            {milestone}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button style={{ marginTop: '1.5rem', width: '100%', padding: '0.75rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#4f46e5', fontWeight: '600', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                                                Explore Role <ChevronRight size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {!loading && pathways.length === 0 && (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>No pathways found for your profile.</div>
                         )}
                     </motion.div>
                 )}

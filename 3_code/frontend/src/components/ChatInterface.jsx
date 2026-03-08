@@ -3,7 +3,7 @@ import api from '../api';
 import { Send, BookOpen, CheckSquare, Paperclip, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const ChatInterface = ({ mode, initialSessionId = null }) => {
+const ChatInterface = ({ mode, initialSessionId = null, prefilledData = null }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -27,6 +27,12 @@ const ChatInterface = ({ mode, initialSessionId = null }) => {
             setMessages([]);
         }
     }, [initialSessionId, mode]);
+
+    useEffect(() => {
+        if (prefilledData && prefilledData.message) {
+            setInput(prefilledData.message);
+        }
+    }, [prefilledData]);
 
     const loadHistory = async (id) => {
         setLoading(true);

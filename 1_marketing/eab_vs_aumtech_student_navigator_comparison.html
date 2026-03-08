@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAB Navigate vs. Aumtech Get Aura</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: #64748b;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-bottom: 4rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .comparison-table th {
+            background: #f1f5f9;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #334155;
+            width: 33.33%;
+        }
+
+        .comparison-table th.highlight {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .check {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .cross {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            color: #0f172a;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .differentiator-list li,
+        .features-list li {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .differentiator-list li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+
+        .features-list li::before {
+            content: "🚀";
+            position: absolute;
+            left: 0;
+        }
+
+        .marketing-hook {
+            background: #1e293b;
+            color: white;
+            padding: 4rem;
+            border-radius: 24px;
+            text-align: center;
+        }
+
+        .marketing-hook h2 {
+            font-size: 2.5rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .marketing-hook p {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Honest Assessment: EAB Navigate vs. Aumtech Student Success (Get Aura)</h1>
+            <p class="subtitle">A strategic teardown of traditional student logistics software versus next-generation
+                AI-native student enablement.</p>
+        </header>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature Capability</th>
+                    <th>EAB Navigate Student</th>
+                    <th class="highlight">Aumtech Student Success (Get Aura)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Architectural Design</strong></td>
+                    <td>Heavy integration, locally stored student PII, batch-sync reliant.</td>
+                    <td><strong>Zero-PII Stateless Proxy.</strong> Reads live data directly from the EdNex Data
+                        Warehouse.</td>
+                </tr>
+                <tr>
+                    <td><strong>Advising & Support</strong></td>
+                    <td>Forms, appointment scheduling, and basic drop-in routing.</td>
+                    <td><strong>"Get Aura" AI 24/7.</strong> NLP-driven advising tailored to Gen Z ("Solo Quest"
+                        auto-resolution, escalating to "Tag In An Advisor").</td>
+                </tr>
+                <tr>
+                    <td><strong>Study & Academic Tools</strong></td>
+                    <td>Basic to-do lists and manual progress reports.</td>
+                    <td><strong>Generative Flashcards & Syllabus Scanner.</strong> Automatically built study aids and
+                        extracted timelines.</td>
+                </tr>
+                <tr>
+                    <td><strong>Data Freshness</strong></td>
+                    <td>Delayed syncing schedules (often overnight batches).</td>
+                    <td><strong>Real-Time.</strong> "Refresh EdNex Data" fetches up-to-the-second LMS/SIS states
+                        dynamically.</td>
+                </tr>
+                <tr>
+                    <td><strong>Student Peer Connection</strong></td>
+                    <td>"Study Buddies" opt-in directory based on course rosters.</td>
+                    <td><strong>Social Campus.</strong> Skill-based Study Group matchmaking and Marketplace for
+                        peer-to-peer exchange.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="card-grid">
+            <div class="card">
+                <span class="badge">The Marketing Hook</span>
+                <h3>The Aumtech Differentiators</h3>
+                <ul class="differentiator-list">
+                    <li><strong>We Don't Manage Logistics, We Enable Learning:</strong> EAB is an administrative tool
+                        disguised as a student app. Aumtech actually helps students pass classes with AI Flashcards,
+                        autonomous syllabus scanning, and real-time AI Insights.</li>
+                    <li><strong>Zero-Liability Data Architecture:</strong> Say goodbye to massive data compliance
+                        headaches. Aumtech operates as a stateless proxy over the EdNex warehouse. If a student deletes
+                        the app, their data never lived on our servers anyway.</li>
+                    <li><strong>Speaking the Gen Z / Alpha Language:</strong> We abandoned institutional jargon.
+                        Students don't "Submit a Tier 1 Help Request," they complete a <strong>"Solo Quest"</strong> or
+                        <strong>"Tag In An Advisor"</strong> when they need backup.</li>
+                    <li><strong>Proactive, Not Reactive:</strong> EAB tells you a hold exists. <em>Get Aura</em> tells
+                        you how to fix it, who to email, and drafts the email for you.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <span class="badge" style="background:#ecfdf5;color:#10b981;">Deployed Features</span>
+                <h3>New Features Deployed to Beat EAB</h3>
+                <ul class="features-list">
+                    <li><strong>"Panic Button" / Instant Hand Raise:</strong> A highly visible, one-click triage button
+                        (e.g., "I Need Help Now") instantly connects a student to crisis counselors, financial emergency
+                        aid, and drops them into an emergency Chat queue.</li>
+                    <li><strong>AI-Powered Career & Major Mapping:</strong> EAB relies on basic Major Explorer quizzes.
+                        Aumtech integrates Labor Market Data into our AI so "Get Aura" visually maps out step-by-step
+                        career pathways based on their current credits.</li>
+                    <li><strong>Intelligent Calendar Sync (Push):</strong> Rather than just pulling data, we
+                        automatically inject Syllabus Scanner output (Deadlines) directly into the student's native
+                        Apple/Google Calendar via an ICS subscription feed.</li>
+                    <li><strong>Targeted "Nudges" via SMS/Push:</strong> Real-time proactive alerts powered by
+                        background jobs. If a student's GPA dips below a threshold, the system automatically pushes an
+                        intervention message instantly.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="marketing-hook">
+            <h2>"Stop babysitting data. Start empowering students."</h2>
+            <p>
+                While legacy software focuses on building better administrative forms, Aumtech transforms the student
+                experience into a proactive, AI-driven journey. With our Zero-PII EdNex architecture and "Get Aura" 24/7
+                copilot, we don't just tell students what's wrong—we give them the exact tools they need to succeed.
+            </p>
+        </div>
+    </div>
+
+</body>
+
+</html>

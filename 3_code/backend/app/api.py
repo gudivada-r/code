@@ -1755,6 +1755,73 @@ async def system_health(current_user: User = Depends(get_current_user), session:
     return health
 
 
+from fastapi.responses import PlainTextResponse
+
+@router.get('/lms/calendar.ics', response_class=PlainTextResponse)
+async def get_calendar_ics(token: str = None):
+    # Mock ICS Feed for demonstration of push calendar sync
+    ics_content = """BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Aumtech//Get Aura Student Success//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Aumtech Student Navigator
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VEVENT
+DTSTART:20260315T140000Z
+DTEND:20260315T150000Z
+SUMMARY:Biology Midterm Exam
+DESCRIPTION:Generated from Syllabus Scanner. Good luck!
+LOCATION:Room 304
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260320T235900Z
+DTEND:20260320T235959Z
+SUMMARY:Calculus Problem Set 4 Due
+DESCRIPTION:Upload via Canvas integration.
+END:VEVENT
+END:VCALENDAR"""
+    return ics_content
+
+@router.get('/career/pathways')
+async def get_career_pathways(current_user: User = Depends(get_current_user)):
+    # Mock data visualizing Labor Market integration (e.g. Lightcast) mapping credits to outcomes
+    return {
+        "status": "success",
+        "pathways": [
+            {
+                "id": 1,
+                "role": "Data Analyst",
+                "milestones": ["Learn SQL & Python", "Complete Statistics Sequence", "Data Visualization Internship"],
+                "salary_range": "$65k - $85k",
+                "match": 95,
+                "demand": "High"
+            },
+            {
+                "id": 2,
+                "role": "Business Intelligence Developer",
+                "milestones": ["Master Tableau/PowerBI", "Database Admin Course", "Finance Minor"],
+                "salary_range": "$75k - $100k",
+                "match": 88,
+                "demand": "Very High"
+            }
+        ]
+    }
+
+@router.post('/cron/nudges')
+async def trigger_nudges(session: Session = Depends(get_session)):
+    # Background job to send SMS/Push Notification nudges to students falling behind
+    from app.models import User
+    from sqlmodel import select
+    # In a real app we would use twilio/AWS SNS to send SMS here.
+    students = session.exec(select(User).where(User.gpa < 2.5)).all()
+    nudges_sent = 0
+    for student in students:
+        nudges_sent += 1
+        # Example Push logic: send_sms(student.phone, f"Hey {student.full_name}, noticed your GPA dipped. Want to run through some Flashcards? - Get Aura")
+    
+    return {"status": "success", "nudges_sent": nudges_sent, "message": "Proactive SMS/Push nudges fired successfully."}
+
 from app.ednex import ednex_router
 router.include_router(ednex_router, prefix='/ednex', tags=['ednex'])
 

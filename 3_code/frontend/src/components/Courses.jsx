@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { BookOpen, Plus, Trash2, TrendingUp, Award, RefreshCw, Settings } from 'lucide-react';
+import { BookOpen, Plus, Trash2, TrendingUp, Award, RefreshCw, Settings, Calendar } from 'lucide-react';
 
 import { motion } from 'framer-motion';
 
@@ -195,6 +195,24 @@ const Courses = () => {
                         }}>
                         <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
                         {isSyncing ? 'Syncing...' : `Refresh EdNex Data`}
+                    </button>
+                    <button
+                        onClick={() => window.open((api.defaults.baseURL || '') + '/api/lms/calendar.ics')}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: 'white',
+                            color: '#e63b7a',
+                            border: '1px solid #e2e8f0',
+                            padding: '10px 20px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            transition: 'all 0.2s'
+                        }}>
+                        <Calendar size={18} />
+                        Subscribe to Calendar
                     </button>
                     <button
                         onClick={() => setIsAdding(true)}
