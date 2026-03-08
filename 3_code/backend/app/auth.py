@@ -128,16 +128,36 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session: Session
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
+        is_ednex: bool = payload.get("ednex", False)
         if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     
-    statement = select(User).where(User.email == email)
-    user = session.exec(statement).first()
-    if user is None:
+    if is_ednex:
+        # Proxy validation
+        from app.ednex import get_supabase_client
+        supabase = get_supabase_client()
+        if supabase:
+            resp = supabase.table("mod00_users").select("*").eq("email", email).limit(1).execute()
+            if resp.data:
+                u = resp.data[0]
+                return User(
+                    id=0, # Virtual ID
+                    email=email,
+                    full_name=f"{u.get('first_name', '')} {u.get('last_name', '')}",
+                    is_active=u.get('is_active', True),
+                    is_admin=False,
+                    is_faculty=(u.get('role') == 'faculty'),
+                    subscription_status='active'
+                )
         raise credentials_exception
-    return user
+    else:
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+        if user is None:
+            raise credentials_exception
+        return user
 
 async def get_admin_user(current_user: User = Depends(get_current_user)):
     if not current_user.is_admin:
