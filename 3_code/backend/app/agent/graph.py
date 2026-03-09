@@ -150,8 +150,8 @@ async def tutor_agent(state: AgentState):
         tokenized_query = gateway.tokenize(last_msg)
         tokenized_rag = gateway.tokenize(rag_info)
         
-        # Use fastest models first to stay within Vercel's 10s serverless timeout
-        models_to_try = ['gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro']
+        # Use fastest models first (Gemini 2.0/Flash-latest) to stay within Vercel timeouts
+        models_to_try = ['gemini-2.0-flash', 'gemini-flash-latest', 'gemini-pro-latest']
         message = None
         
         prompt_text = f"""You are a concise, friendly academic advisor bot named Aura.
