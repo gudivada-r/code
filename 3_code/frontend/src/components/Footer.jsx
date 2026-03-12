@@ -8,8 +8,8 @@ const Footer = ({ onNavigate }) => {
 
                 {/* Brand */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <img src={logoAsset} alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '6px' }} />
-                    <span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#1e293b' }}>Aura</span>
+                    <img src={logoAsset} alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid #e2e8f0', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))' }} />
+                    <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#1e293b', letterSpacing: '-0.02em' }}>Aura</span>
                 </div>
 
                 {/* Centralized Links */}

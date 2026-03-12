@@ -77,17 +77,17 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                 {/* Logo & Close Button */}
                 <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2.5rem', paddingTop: '1rem' }}>
                     <div style={{ padding: '0px', borderRadius: '10px' }}>
-                        <img src={logoAsset} alt="Logo" style={{ width: '200px', height: 'auto', borderRadius: '12px', filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.15))' }} />
+                        <img src={logoAsset} alt="Logo" style={{ width: '180px', height: 'auto', borderRadius: '16px', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))', border: '2px solid #e2e8f0' }} />
                     </div>
 
-                    <div style={{ textAlign: 'center', marginTop: '12px' }}>
-                        <h2 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, lineHeight: 1.1 }}>Aura</h2>
-                        <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Intelligent Academic Platform</span>
+                    <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                        <h2 style={{ fontSize: '1.6rem', fontWeight: '900', margin: 0, lineHeight: 1.1, color: '#1e293b', letterSpacing: '-0.02em' }}>Aura</h2>
+                        <span style={{ fontSize: '0.95rem', color: '#64748b', fontWeight: '600' }}>Intelligent Academic Platform</span>
                     </div>
 
                     {/* Mobile Close Button */}
-                    <button className="mobile-only" onClick={onClose} style={{ position: 'absolute', right: '0.5rem', top: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-                        <X size={24} />
+                    <button className="mobile-only" onClick={onClose} style={{ position: 'absolute', right: '0.5rem', top: '0.5rem', background: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', cursor: 'pointer', color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <X size={24} strokeWidth={3} />
                     </button>
                 </div>
 
@@ -96,63 +96,63 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                     {/* ... existing dynamic nav items ... */}
                     {/* MAIN NAVIGATION */}
                     <div className="section-title">Home</div>
-                    <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => handleProtectedTab('dashboard')}><LayoutDashboard size={20} /> Dashboard</div>
-                    <div className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleProtectedTab('chat')}><MessageSquare size={20} /> Get Aura</div>
-                    <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => handleProtectedTab('analytics')}><TrendingUp size={20} /> Institutional Research</div>
+                    <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => handleProtectedTab('dashboard')}><LayoutDashboard size={20} strokeWidth={2.75} /> Dashboard</div>
+                    <div className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleProtectedTab('chat')}><MessageSquare size={20} strokeWidth={2.75} /> Get Aura</div>
+                    <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => handleProtectedTab('analytics')}><TrendingUp size={20} strokeWidth={2.75} /> Institutional Research</div>
 
                     <div className="section-title">Academics</div>
-                    <div className={`nav-item ${activeTab === 'degree-roadmap' ? 'active' : ''}`} onClick={() => handleProtectedTab('degree-roadmap')}><Map size={20} /> Degree Roadmap</div>
-                    <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => handleProtectedTab('courses')}><BookOpen size={20} /> Courses</div>
-                    <div className={`nav-item ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => handleProtectedTab('schedule')}><Calendar size={20} /> Schedule</div>
-                    <div className={`nav-item ${activeTab === 'syllabus' ? 'active' : ''}`} onClick={() => handleProtectedTab('syllabus')}><ScanLine size={20} /> Syllabus Scanner</div>
-                    <div className={`nav-item ${activeTab === 'cip' ? 'active' : ''}`} onClick={() => handleProtectedTab('cip')}><BookOpen size={20} /> CIP Codes</div>
-                    <div className={`nav-item ${activeTab === 'voice-notes' ? 'active' : ''}`} onClick={() => handleProtectedTab('voice-notes')}><Mic size={20} /> Lecture Notes</div>
+                    <div className={`nav-item ${activeTab === 'degree-roadmap' ? 'active' : ''}`} onClick={() => handleProtectedTab('degree-roadmap')}><Map size={20} strokeWidth={2.75} /> Degree Roadmap</div>
+                    <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => handleProtectedTab('courses')}><BookOpen size={20} strokeWidth={2.75} /> Courses</div>
+                    <div className={`nav-item ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => handleProtectedTab('schedule')}><Calendar size={20} strokeWidth={2.75} /> Schedule</div>
+                    <div className={`nav-item ${activeTab === 'syllabus' ? 'active' : ''}`} onClick={() => handleProtectedTab('syllabus')}><ScanLine size={20} strokeWidth={2.75} /> Syllabus Scanner</div>
+                    <div className={`nav-item ${activeTab === 'cip' ? 'active' : ''}`} onClick={() => handleProtectedTab('cip')}><BookOpen size={20} strokeWidth={2.75} /> CIP Codes</div>
+                    <div className={`nav-item ${activeTab === 'voice-notes' ? 'active' : ''}`} onClick={() => handleProtectedTab('voice-notes')}><Mic size={20} strokeWidth={2.75} /> Lecture Notes</div>
 
                     <div className="section-title">My Records</div>
-                    <div className={`nav-item ${activeTab === 'forms' ? 'active' : ''}`} onClick={() => handleProtectedTab('forms')}><FileText size={20} /> Drop/Add Forms</div>
-                    <div className={`nav-item ${activeTab === 'progress' ? 'active' : ''}`} onClick={() => handleProtectedTab('progress')}><TrendingUp size={20} /> Progress</div>
-                    <div className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => handleProtectedTab('history')}><HistoryIcon size={20} /> My History</div>
+                    <div className={`nav-item ${activeTab === 'forms' ? 'active' : ''}`} onClick={() => handleProtectedTab('forms')}><FileText size={20} strokeWidth={2.75} /> Drop/Add Forms</div>
+                    <div className={`nav-item ${activeTab === 'progress' ? 'active' : ''}`} onClick={() => handleProtectedTab('progress')}><TrendingUp size={20} strokeWidth={2.75} /> Progress</div>
+                    <div className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => handleProtectedTab('history')}><HistoryIcon size={20} strokeWidth={2.75} /> My History</div>
 
                     <div className="section-title">Tools & Support</div>
-                    <div className={`nav-item ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => handleProtectedTab('timer')}><Clock size={20} /> Study Timer</div>
-                    <div className={`nav-item ${activeTab === 'smart-study' ? 'active' : ''}`} onClick={() => handleProtectedTab('smart-study')}><Brain size={20} /> Flashcards</div>
-                    <div className={`nav-item ${activeTab === 'tutoring' ? 'active' : ''}`} onClick={() => handleProtectedTab('tutoring')}><GraduationCap size={20} /> Tutoring Center</div>
-                    <div className={`nav-item ${activeTab === 'financial' ? 'active' : ''}`} onClick={() => handleProtectedTab('financial')}><GraduationCap size={20} /> Financial Nexus</div>
-                    <div className={`nav-item ${activeTab === 'career' ? 'active' : ''}`} onClick={() => handleProtectedTab('career')}><Briefcase size={20} /> Career Pathfinder</div>
-                    <div className={`nav-item ${activeTab === 'ednex' ? 'active' : ''}`} onClick={() => handleProtectedTab('ednex')}><Briefcase size={20} /> Project EdNex</div>
-                    <div className={`nav-item ${activeTab === 'holds' ? 'active' : ''}`} onClick={() => handleProtectedTab('holds')}><ShieldAlert size={20} /> Holds & Alerts</div>
-                    <div className={`nav-item ${activeTab === 'subscription' ? 'active' : ''}`} onClick={() => handleProtectedTab('subscription')}><Shield size={20} /> Institutional Access</div>
+                    <div className={`nav-item ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => handleProtectedTab('timer')}><Clock size={20} strokeWidth={2.75} /> Study Timer</div>
+                    <div className={`nav-item ${activeTab === 'smart-study' ? 'active' : ''}`} onClick={() => handleProtectedTab('smart-study')}><Brain size={20} strokeWidth={2.75} /> Flashcards</div>
+                    <div className={`nav-item ${activeTab === 'tutoring' ? 'active' : ''}`} onClick={() => handleProtectedTab('tutoring')}><GraduationCap size={20} strokeWidth={2.75} /> Tutoring Center</div>
+                    <div className={`nav-item ${activeTab === 'financial' ? 'active' : ''}`} onClick={() => handleProtectedTab('financial')}><GraduationCap size={20} strokeWidth={2.75} /> Financial Nexus</div>
+                    <div className={`nav-item ${activeTab === 'career' ? 'active' : ''}`} onClick={() => handleProtectedTab('career')}><Briefcase size={20} strokeWidth={2.75} /> Career Pathfinder</div>
+                    <div className={`nav-item ${activeTab === 'ednex' ? 'active' : ''}`} onClick={() => handleProtectedTab('ednex')}><Briefcase size={20} strokeWidth={2.75} /> Project EdNex</div>
+                    <div className={`nav-item ${activeTab === 'holds' ? 'active' : ''}`} onClick={() => handleProtectedTab('holds')}><ShieldAlert size={20} strokeWidth={2.75} /> Holds & Alerts</div>
+                    <div className={`nav-item ${activeTab === 'subscription' ? 'active' : ''}`} onClick={() => handleProtectedTab('subscription')}><Shield size={20} strokeWidth={2.75} /> Institutional Access</div>
 
                     <div className="section-title">Campus Life</div>
-                    <div className={`nav-item ${activeTab === 'social' ? 'active' : ''}`} onClick={() => handleProtectedTab('social')}><Users size={20} /> Social Campus</div>
-                    <div className={`nav-item ${activeTab === 'wellness' ? 'active' : ''}`} onClick={() => handleProtectedTab('wellness')}><Heart size={20} /> Wellness</div>
+                    <div className={`nav-item ${activeTab === 'social' ? 'active' : ''}`} onClick={() => handleProtectedTab('social')}><Users size={20} strokeWidth={2.75} /> Social Campus</div>
+                    <div className={`nav-item ${activeTab === 'wellness' ? 'active' : ''}`} onClick={() => handleProtectedTab('wellness')}><Heart size={20} strokeWidth={2.75} /> Wellness</div>
 
                     {(userData?.is_faculty || userData?.is_admin) && (
                         <>
                             <div className="section-title">Faculty & Staff</div>
-                            <div className={`nav-item ${activeTab === 'faculty' ? 'active' : ''}`} onClick={() => handleProtectedTab('faculty')}><Users size={20} /> Faculty Portal</div>
+                            <div className={`nav-item ${activeTab === 'faculty' ? 'active' : ''}`} onClick={() => handleProtectedTab('faculty')}><Users size={20} strokeWidth={2.75} /> Faculty Portal</div>
                         </>
                     )}
 
                     {userData?.is_admin && (
                         <>
                             <div className="section-title">Admin</div>
-                            <div className={`nav-item ${activeTab === 'adminPanel' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminPanel')}><Shield size={20} /> Admin Panel</div>
-                            <div className={`nav-item ${activeTab === 'adminEdnex' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminEdnex')}><Database size={20} /> EdNex Config</div>
-                            <div className={`nav-item ${activeTab === 'quoteGen' ? 'active' : ''}`} onClick={() => handleProtectedTab('quoteGen')}><Calculator size={20} /> Quote Generator</div>
+                            <div className={`nav-item ${activeTab === 'adminPanel' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminPanel')}><Shield size={20} strokeWidth={2.75} /> Admin Panel</div>
+                            <div className={`nav-item ${activeTab === 'adminEdnex' ? 'active' : ''}`} onClick={() => handleProtectedTab('adminEdnex')}><Database size={20} strokeWidth={2.75} /> EdNex Config</div>
+                            <div className={`nav-item ${activeTab === 'quoteGen' ? 'active' : ''}`} onClick={() => handleProtectedTab('quoteGen')}><Calculator size={20} strokeWidth={2.75} /> Quote Generator</div>
                         </>
                     )}
 
                     {/* Bottom Config */}
                     <div style={{ marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
-                        <div className="nav-item" onClick={() => handleProtectedTab('edit-profile')}><Settings size={20} /> Settings</div>
+                        <div className="nav-item" onClick={() => handleProtectedTab('edit-profile')}><Settings size={20} strokeWidth={2.75} /> Settings</div>
                         {isLoggedIn ? (
                             <div onClick={handleLogout} className="nav-item" style={{ color: '#ef4444' }}>
-                                <LogOut size={20} /> Logout
+                                <LogOut size={20} strokeWidth={2.75} /> Logout
                             </div>
                         ) : (
                             <div onClick={handleLogin} className="nav-item" style={{ color: '#4f46e5' }}>
-                                <User size={20} /> Login / Sign Up
+                                <User size={20} strokeWidth={2.75} /> Login / Sign Up
                             </div>
                         )}
 
@@ -196,15 +196,14 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                 className="hero-card"
                 style={{ position: 'relative' }}
             >
-                {/* EdNex Verified Badge */}
                 {userData?.is_ednex_verified && (
                     <div className="ednex-neon" style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', color: 'white' }}>
-                        <Shield size={14} /> EdNex Verified
+                        <Shield size={14} strokeWidth={3} /> EdNex Verified
                     </div>
                 )}
                 <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem', opacity: 0.9 }}>
-                        <Brain size={18} /> Aura Intelligence Engine
+                        <Brain size={18} strokeWidth={2.5} /> Aura Intelligence Engine
                     </div>
                     <h1 style={{ fontSize: '2.5rem', margin: '0.5rem 0 1rem 0', fontWeight: '700' }}>
                         Good afternoon, {userData?.full_name ? userData.full_name.split(' ')[0] : 'Student'}!
@@ -224,7 +223,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                             onClick={onEditStats}
                             style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}
                         >
-                            <Edit3 size={16} />
+                            <Edit3 size={16} strokeWidth={2.75} />
                         </button>
                     </div>
                     <div className="stat-card-glass">
@@ -264,7 +263,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                         onClick={() => item.action && onNavigate(item.action)}
                     >
                         <div style={{ background: `${item.color}15`, width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
-                            <item.icon color={item.color} size={24} />
+                            <item.icon color={item.color} size={24} strokeWidth={2.75} />
                         </div>
                         <div style={{ fontWeight: '600', marginBottom: '4px' }}>{item.label}</div>
                         <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{item.sub}</div>
@@ -275,7 +274,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
             {/* AI Team */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem' }}>
                 <h3 className="section-title" style={{ margin: 0 }}>Your AI Support Team</h3>
-                <button className="pill-btn" onClick={() => onNavigate('chat')} style={{ cursor: 'pointer', background: 'white', border: '1px solid #e2e8f0' }}>Open Chat <ChevronRight size={16} style={{ verticalAlign: 'middle' }} /></button>
+                <button className="pill-btn" onClick={() => onNavigate('chat')} style={{ cursor: 'pointer', background: 'white', border: '1px solid #e2e8f0' }}>Open Chat <ChevronRight size={16} strokeWidth={3} style={{ verticalAlign: 'middle' }} /></button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(165px, 1fr))', gap: '1rem', marginTop: '1.5rem', paddingBottom: '2rem' }}>
@@ -287,7 +286,7 @@ const DashboardHome = ({ onNavigate, userData, onEditStats }) => {
                     <motion.div key={idx} className="card-white" style={{ cursor: 'pointer' }} onClick={() => onNavigate('chat', agent.mode)}>
                         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                             <div style={{ background: agent.color, padding: '12px', borderRadius: '12px', color: 'white' }}>
-                                <agent.icon size={24} />
+                                <agent.icon size={24} strokeWidth={2.75} />
                             </div>
                             <div>
                                 <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{agent.title}</div>
@@ -675,7 +674,7 @@ const Dashboard = () => {
                     <span style={{ fontWeight: '700', fontSize: '1.5rem', color: '#0f172a' }}>Aura</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1e293b' }}>
-                    <Menu size={24} />
+                    <Menu size={28} strokeWidth={2.75} />
                 </button>
             </div>
 
@@ -758,13 +757,13 @@ const Dashboard = () => {
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <AlertTriangle color="#ef4444" size={20} />
+                                        <AlertTriangle color="#ef4444" size={20} strokeWidth={2.75} />
                                         <span style={{ color: '#991b1b', fontWeight: '700' }}>
                                             You have {holds.filter(h => h.status === 'active').length} active hold(s) or alert(s) that require your attention.
                                         </span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontWeight: '700', fontSize: '0.9rem' }}>
-                                        View Details <ChevronRight size={16} />
+                                        View Details <ChevronRight size={16} strokeWidth={3} />
                                     </div>
                                 </motion.div>
                             )}
@@ -883,7 +882,7 @@ const Dashboard = () => {
                         zIndex: 1000
                     }}
                 >
-                    <AlertTriangle size={20} />
+                    <AlertTriangle size={20} strokeWidth={3} />
                     I Need Help Now
                 </motion.button>
             )}
