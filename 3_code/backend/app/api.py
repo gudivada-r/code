@@ -790,20 +790,38 @@ async def query_agent(
             history_lc.append(HumanMessage(content=request.query))
 
         # Invoke the graph
+        student_context_data = {
+            "name": current_user.full_name,
+            "major": current_user.major,
+            "gpa": current_user.gpa,
+            "background": current_user.background,
+            "interests": current_user.interests,
+            "previous_insight": current_user.ai_insight,
+            "is_ednex": is_ednex_user
+        }
+
+        # For EdNex users, enrich with full Data Warehouse context
+        if is_ednex_user:
+            try:
+                from app.ednex import get_ednex_context
+                en_ctx = get_ednex_context(current_user.email)
+                if en_ctx:
+                    # Flatten/Merge relevant deeper data for the LLM
+                    student_context_data["detailed_sis"] = en_ctx.get("sis_stream")
+                    student_context_data["financial_status"] = en_ctx.get("finance_stream")
+                    student_context_data["admissions_history"] = en_ctx.get("admissions_stream")
+                    student_context_data["degree_audit"] = en_ctx.get("advisement_stream")
+                    student_context_data["financial_aid_packages"] = en_ctx.get("financial_aid_stream")
+                    student_context_data["contributions"] = en_ctx.get("contributions_stream")
+            except Exception as e:
+                print(f"Warning: Failed to enrich EdNex context for AI: {e}")
+
         inputs = {
             "messages": history_lc,
             "student_id": str(abs(current_user.id) if current_user.id else 0),
             "next_step": "",
             "final_response": {},
-            "student_context": {
-                "name": current_user.full_name,
-                "major": current_user.major,
-                "gpa": current_user.gpa,
-                "background": current_user.background,
-                "interests": current_user.interests,
-                "previous_insight": current_user.ai_insight,
-                "is_ednex": is_ednex_user
-            }
+            "student_context": student_context_data
         }
         
         try:

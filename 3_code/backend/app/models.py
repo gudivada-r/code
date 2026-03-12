@@ -216,3 +216,6 @@ class SystemConfig(SQLModel, table=True):
     key_value: str
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+# --- Student Information System (SIS) Enhancement Models ---
+
+# SIS Models Removed from local Neon per user request (Architecture Option A)

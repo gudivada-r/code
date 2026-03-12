@@ -296,8 +296,9 @@ const AdminEdnex = () => {
                                             <div style={{ color: '#64748b' }}>External ID:</div><div>{selectedStudent.modules.mod01_student_profiles.external_student_id}</div>
                                             <div style={{ color: '#64748b' }}>Status:</div><div>{selectedStudent.modules.mod01_student_profiles.enrollment_status}</div>
                                             <div style={{ color: '#64748b' }}>Cum. GPA:</div><div style={{ fontWeight: 'bold', color: '#0f172a' }}>{selectedStudent.modules.mod01_student_profiles.cumulative_gpa}</div>
-                                            <div style={{ color: '#64748b' }}>Credits:</div><div>{selectedStudent.modules.mod01_student_profiles.credits_earned}</div>
-                                            <div style={{ color: '#64748b' }}>Standing:</div><div>{selectedStudent.modules.mod01_student_profiles.academic_standing}</div>
+                                            <div style={{ color: '#64748b' }}>Credits:</div><div>{selectedStudent.modules.mod01_student_profiles.credits_earned || selectedStudent.modules.mod01_student_profiles.total_units_earned || 0}</div>
+                                            <div style={{ color: '#64748b' }}>Standing:</div><div>{selectedStudent.modules.mod01_student_profiles.academic_standing || 'Normal'}</div>
+                                            <div style={{ color: '#64748b' }}>DOB:</div><div>{selectedStudent.modules.mod01_student_profiles.dob ? new Date(selectedStudent.modules.mod01_student_profiles.dob).toLocaleDateString() : 'N/A'}</div>
                                         </div>
                                     ) : (
                                         <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>No SIS profile found.</p>
@@ -311,7 +312,9 @@ const AdminEdnex = () => {
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px', fontSize: '0.9rem' }}>
                                             <div style={{ color: '#64748b' }}>Tuition Bal:</div><div style={{ color: '#dc2626', fontWeight: 'bold' }}>${selectedStudent.modules.mod02_student_accounts.tuition_balance}</div>
                                             <div style={{ color: '#64748b' }}>Fees Bal:</div><div>${selectedStudent.modules.mod02_student_accounts.fees_balance}</div>
-                                            <div style={{ color: '#64748b' }}>Fin Aid:</div><div style={{ color: '#16a34a' }}>${selectedStudent.modules.mod02_student_accounts.financial_aid_award}</div>
+                                            <div style={{ color: '#64748b' }}>Fin Aid:</div><div style={{ color: '#16a34a' }}>${selectedStudent.modules.mod02_student_accounts.financial_aid_award || selectedStudent.modules.mod02_student_accounts.pending_aid || 0}</div>
+                                            <div style={{ color: '#64748b' }}>Net Due:</div><div style={{ fontWeight: 'bold' }}>${selectedStudent.modules.mod02_student_accounts.net_amount_due || 0}</div>
+                                            <div style={{ color: '#64748b' }}>Bill Date:</div><div>{selectedStudent.modules.mod02_student_accounts.last_bill_date ? new Date(selectedStudent.modules.mod02_student_accounts.last_bill_date).toLocaleDateString() : 'N/A'}</div>
                                             <div style={{ color: '#64748b' }}>Hold:</div>
                                             <div>
                                                 {selectedStudent.modules.mod02_student_accounts.has_financial_hold ? (
@@ -339,6 +342,94 @@ const AdminEdnex = () => {
                                     ) : (
                                         <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>Not enrolled in any sections.</p>
                                     )}
+                                </div>
+
+                                {/* Admissions Box */}
+                                <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                    <h4 style={{ margin: '0 0 1rem 0', color: '#334155', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>Admission Applications</h4>
+                                    {selectedStudent.modules.mod06_admissions_applications && selectedStudent.modules.mod06_admissions_applications.length > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {selectedStudent.modules.mod06_admissions_applications.map((app, i) => (
+                                                <div key={i} style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                                        <strong style={{ color: '#0f172a' }}>{app.app_number}</strong>
+                                                        <span style={{ color: '#4f46e5', fontWeight: '600' }}>{app.status}</span>
+                                                    </div>
+                                                    <div style={{ color: '#64748b' }}>{app.admit_type} • {app.admit_term} • GPA: {app.external_gpa}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>No admissions data.</p>
+                                    )}
+                                </div>
+
+                                {/* Financial Aid Packages Box */}
+                                <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                    <h4 style={{ margin: '0 0 1rem 0', color: '#334155', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>Financial Aid Packages</h4>
+                                    {selectedStudent.modules.mod08_aid_packages && selectedStudent.modules.mod08_aid_packages.length > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {selectedStudent.modules.mod08_aid_packages.map((pkg, i) => (
+                                                <div key={i} style={{ background: '#f0fdf4', padding: '12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                                        <strong style={{ color: '#16a34a' }}>Year: {pkg.aid_year}</strong>
+                                                        <span style={{ fontWeight: 'bold' }}>{pkg.status}</span>
+                                                    </div>
+                                                    <div style={{ color: '#166534', fontSize: '0.8rem' }}>
+                                                        Offered: ${pkg.total_offered.toLocaleString()} • Distributed: ${pkg.total_disbursed.toLocaleString()}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>No aid packages found.</p>
+                                    )}
+                                </div>
+
+                                {/* Contributions Box */}
+                                <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                    <h4 style={{ margin: '0 0 1rem 0', color: '#334155', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>Institutional Contributions</h4>
+                                    {selectedStudent.modules.mod09_contributions && selectedStudent.modules.mod09_contributions.length > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {selectedStudent.modules.mod09_contributions.map((con, i) => (
+                                                <div key={i} style={{ background: '#fff7ed', padding: '12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <strong style={{ color: '#c2410c' }}>${con.amount.toLocaleString()}</strong>
+                                                        <span style={{ fontSize: '0.75rem', color: '#9a3412' }}>{new Date(con.contribution_date).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', marginTop: '2px' }}>{con.type}: {con.designation}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>No contributions found.</p>
+                                    )}
+                                </div>
+
+                                {/* Degree Audit Box */}
+                                <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0', gridColumn: 'span 2' }}>
+                                    <h4 style={{ margin: '0 0 1rem 0', color: '#334155', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>Degree Requirement Audit</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                        {selectedStudent.modules.mod07_degree_audits && selectedStudent.modules.mod07_degree_audits.length > 0 ? (
+                                            selectedStudent.modules.mod07_degree_audits.map((audit, i) => (
+                                                <div key={i} style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                        <span style={{ fontWeight: '500', color: '#1e293b' }}>{audit.requirement_name}</span>
+                                                        <span style={{ 
+                                                            fontSize: '0.75rem', 
+                                                            fontWeight: 'bold', 
+                                                            color: audit.status === 'Met' ? '#16a34a' : audit.status === 'In Progress' ? '#ca8a04' : '#dc2626'
+                                                        }}>{audit.status}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                                        Applied: {JSON.stringify(audit.courses_applied)}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>No audit records found.</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

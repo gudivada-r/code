@@ -1,4 +1,8 @@
-from typing import TypedDict, List, Annotated
+from typing import TypedDict, List
+try:
+    from typing import Annotated
+except ImportError:
+    from typing_extensions import Annotated
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, END
 from app.agent.tools import lms_tool, calendar_tool, rag_tool
@@ -21,38 +25,67 @@ class PrivacyGateway:
         """Replace sensitive terms with durable tokens."""
         scrubbed_text = text
         
-        # 1. Scrub Student Name
+        # 1. Scrub Student Name (Full Name first to avoid partial overlap)
         name = self.student_context.get('name')
         if name:
             token = "[[STUDENT_NAME]]"
             self.mapping[name] = token
             self.reverse_mapping[token] = name
-            # Case insensitive replacement for common nicknames or variations
             scrubbed_text = re.sub(re.escape(name), token, scrubbed_text, flags=re.IGNORECASE)
             
-            # Also scrub individual parts of the name (e.g. just first name)
+            # Scrub individual parts
             parts = name.split()
-            if len(parts) > 1:
+            if len(parts) > 0:
+                # Use a specific token for first name to differentiate
                 first_name = parts[0]
-                self.mapping[first_name] = "[[STUDENT_FIRST_NAME]]"
-                self.reverse_mapping["[[STUDENT_FIRST_NAME]]"] = first_name
-                scrubbed_text = re.sub(re.escape(first_name), "[[STUDENT_FIRST_NAME]]", scrubbed_text, flags=re.IGNORECASE)
+                if first_name.lower() not in scrubbed_text.lower():
+                    pass # Already covered by full name
+                else:
+                    self.mapping[first_name] = "[[STUDENT_FIRST_NAME]]"
+                    self.reverse_mapping["[[STUDENT_FIRST_NAME]]"] = first_name
+                    scrubbed_text = re.sub(re.escape(first_name), "[[STUDENT_FIRST_NAME]]", scrubbed_text, flags=re.IGNORECASE)
 
         # 2. Scrub Emails 
         email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
         emails = re.findall(email_pattern, scrubbed_text)
         for email in emails:
-            token = f"[[EMAIL_{hash(email) % 1000}]]"
+            # Use stable token based on email hash
+            import hashlib
+            h = hashlib.md5(email.lower().encode()).hexdigest()[:4]
+            token = f"[[EMAIL_{h}]]"
             self.mapping[email] = token
             self.reverse_mapping[token] = email
             scrubbed_text = scrubbed_text.replace(email, token)
+
+        # 3. Scrub UUIDs (Common in Supabase/EdNex)
+        uuid_pattern = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+        uuids = re.findall(uuid_pattern, scrubbed_text, flags=re.IGNORECASE)
+        for uid in uuids:
+            import hashlib
+            h = hashlib.md5(uid.lower().encode()).hexdigest()[:4]
+            token = f"[[ID_{h}]]"
+            self.mapping[uid] = token
+            self.reverse_mapping[token] = uid
+            scrubbed_text = scrubbed_text.replace(uid, token)
+
+        # 4. Scrub Phone Numbers
+        phone_pattern = r'(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}'
+        # Use finditer to get exact matches to avoid tuple issues with groups
+        for match in re.finditer(phone_pattern, scrubbed_text):
+            found_phone = match.group(0)
+            token = "[[PHONE_NUMBER]]"
+            # We don't usually restore phone numbers for simple bots, but we could
+            scrubbed_text = scrubbed_text.replace(found_phone, token)
 
         return scrubbed_text
 
     def detokenize(self, text: str) -> str:
         """Restore PII from tokens in the LLM response."""
         restored_text = text
-        for token, original in self.reverse_mapping.items():
+        # Sort tokens by length (longest first) to avoid partial replacement of tokens themselves if they overlap
+        sorted_tokens = sorted(self.reverse_mapping.keys(), key=len, reverse=True)
+        for token in sorted_tokens:
+            original = self.reverse_mapping[token]
             restored_text = restored_text.replace(token, original)
         return restored_text
 
@@ -132,7 +165,22 @@ async def tutor_agent(state: AgentState):
     if grades:
         grade_context = "LMS Grades: " + ", ".join([f"{k}: {v}" for k, v in grades.items()])
     elif is_ednex:
-        grade_context = "Academic Data: Managed centrally via EdNex, refer to the Student Profile for GPA."
+        # Incorporate full Data Warehouse context
+        detailed_sis = student_context.get("detailed_sis", {})
+        fin = student_context.get("financial_status", {})
+        adm = student_context.get("admissions_history", [])
+        audit = student_context.get("degree_audit", [])
+        aid = student_context.get("financial_aid_packages", [])
+        
+        grade_context = f"""[EDNEX DATA WAREHOUSE CONTEXT]
+        Academic Standing: {detailed_sis.get('academic_standing', 'N/A')}
+        Units Earned: {detailed_sis.get('total_units_earned', 0)}
+        Financial account balance: ${fin.get('tuition_balance', 0) + fin.get('fees_balance', 0)}
+        Net Amount Due: ${fin.get('net_amount_due', 0)} (Last bill: {fin.get('last_bill_date', 'N/A')})
+        Admissions: {str(adm)}
+        Degree Audit Items: {str(audit)}
+        Financial Aid Packages: {str(aid)}
+        """
     else:
         grade_context = "LMS Grades: Not connected."
         

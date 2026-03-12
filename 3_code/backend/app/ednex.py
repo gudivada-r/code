@@ -113,13 +113,26 @@ async def get_ednex_context(
             if student_data:
                 student_id = student_data["id"]
 
-                # 1. Fetch SIS Stream Data (mod01)
+                # 1. Fetch SIS Stream Data (mod01) - ENHANCED
                 sis_resp = supabase.table("mod01_student_profiles").select("*").eq("user_id", student_id).execute()
                 sis_data = sis_resp.data[0] if sis_resp.data else {}
 
-                # 2. Fetch Finance Stream Data (mod02)
+                # 2. Fetch Finance Stream Data (mod02) - ENHANCED
                 finance_resp = supabase.table("mod02_student_accounts").select("*").eq("student_id", student_id).execute()
                 finance_data = finance_resp.data[0] if finance_resp.data else {}
+
+                # 3. New SIS Enhancement Streams
+                admissions_resp = supabase.table("mod06_admissions_applications").select("*").eq("user_id", student_id).execute()
+                admissions_data = admissions_resp.data if admissions_resp.data else []
+
+                advisement_resp = supabase.table("mod07_degree_audits").select("*").eq("user_id", student_id).execute()
+                advisement_data = advisement_resp.data if advisement_resp.data else []
+
+                aid_resp = supabase.table("mod08_aid_packages").select("*").eq("student_id", student_id).execute()
+                aid_data = aid_resp.data if aid_resp.data else []
+                
+                contributions_resp = supabase.table("mod09_contributions").select("*").eq("user_id", student_id).execute()
+                contributions_data = contributions_resp.data if contributions_resp.data else []
 
                 context = {
                     "student_profile": {
@@ -128,7 +141,11 @@ async def get_ednex_context(
                         "institution_id": student_data.get("institution_id")
                     },
                     "sis_stream": sis_data,
-                    "finance_stream": finance_data
+                    "finance_stream": finance_data,
+                    "admissions_stream": admissions_data,
+                    "advisement_stream": advisement_data,
+                    "financial_aid_stream": aid_data,
+                    "contributions_stream": contributions_data
                 }
 
                 return {
@@ -230,7 +247,11 @@ async def get_ednex_health(current_user: User = Depends(get_current_user)):
         'Mod-04: Catalog (Enrollments)': 'mod04_enrollments',
         'Mod-05: Career (Companies)': 'mod05_companies',
         'Mod-05: Career (Jobs)': 'mod05_jobs',
-        'Mod-05: Career (Applications)': 'mod05_applications'
+        'Mod-05: Career (Applications)': 'mod05_applications',
+        'Mod-06: Admissions': 'mod06_admissions_applications',
+        'Mod-07: Advisement (Audit)': 'mod07_degree_audits',
+        'Mod-08: Financial Aid': 'mod08_aid_packages',
+        'Mod-09: Contributions': 'mod09_contributions'
     }
 
     health_data = {}
@@ -305,7 +326,11 @@ async def search_ednex_users(
             'mod01_student_profiles': None,
             'mod02_student_accounts': None,
             'mod03_advising_appointments': [],
-            'mod04_enrollments': []
+            'mod04_enrollments': [],
+            'mod06_admissions_applications': [],
+            'mod07_degree_audits': [],
+            'mod08_aid_packages': [],
+            'mod09_contributions': []
         }
         
         # Check Mod01
@@ -331,6 +356,27 @@ async def search_ednex_users(
             e_resp = supabase.table("mod04_enrollments").select("*").eq("student_id", student_id).execute()
             modules_data['mod04_enrollments'] = e_resp.data if e_resp.data else []
         except Exception as e: modules_data['mod04_enrollments'] = {"error": str(e)}
+
+        # Check New SIS Enhancement Modules (mod06-mod09)
+        try:
+            adm_resp = supabase.table("mod06_admissions_applications").select("*").eq("user_id", student_id).execute()
+            modules_data['mod06_admissions_applications'] = adm_resp.data if adm_resp.data else []
+        except Exception: pass
+
+        try:
+            aud_resp = supabase.table("mod07_degree_audits").select("*").eq("user_id", student_id).execute()
+            modules_data['mod07_degree_audits'] = aud_resp.data if aud_resp.data else []
+        except Exception: pass
+
+        try:
+            aid_resp = supabase.table("mod08_aid_packages").select("*").eq("student_id", student_id).execute()
+            modules_data['mod08_aid_packages'] = aid_resp.data if aid_resp.data else []
+        except Exception: pass
+
+        try:
+            con_resp = supabase.table("mod09_contributions").select("*").eq("user_id", student_id).execute()
+            modules_data['mod09_contributions'] = con_resp.data if con_resp.data else []
+        except Exception: pass
         
         all_results.append({
             "ednex_student_id": student_id,
