@@ -86,7 +86,7 @@ const Sidebar = ({ activeTab, onTabChange, userData, isOpen, onClose }) => {
                     </div>
 
                     {/* Mobile Close Button */}
-                    <button className="mobile-only" onClick={onClose} style={{ position: 'absolute', right: '0.5rem', top: '0.5rem', background: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', cursor: 'pointer', color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button className="mobile-only" onClick={onClose} style={{ position: 'absolute', right: '0.5rem', top: '0.5rem', background: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', cursor: 'pointer', color: '#1e293b', alignItems: 'center', justifyContent: 'center' }}>
                         <X size={24} strokeWidth={3} />
                     </button>
                 </div>
